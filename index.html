@@ -1,0 +1,766 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KSK Solar &amp; Power Monitoring System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.577.0/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <style>
+    :root{--ink:#15334a;--navy:#102b46;--gold:#f5bd4f;
+      /* สีประจำแต่ละหัวข้อ (ค่าเริ่มต้น) */
+      --c1:#173e80;--c2:#13b8a1;--t1:#ffffff;--t2:#eef8fb;--bd:#d5e6ea}
+    *{box-sizing:border-box}
+    html,body{margin:0;width:100%;font-family:Prompt,sans-serif;color:var(--ink)}
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+
+    /* ===== พื้นหลังเข้มขึ้น (gradient) ===== */
+    body{background:linear-gradient(155deg,#7fa9cf,#6fa6c9 30%,#9189cf 65%,#6cbba6)}
+    .app-shell{width:100%;min-height:100vh;padding:16px 0 55px;background:linear-gradient(155deg,#7fa9cf,#6fa6c9 28%,#938bd1 62%,#6cbba6)}
+
+    .site-header{margin:0 16px;border-radius:23px;background:linear-gradient(110deg,#0d2742,#1b5381 52%,#0e7f86);border:1px solid #64b6c6;box-shadow:0 16px 36px #0b2a4a55}
+    .nav-region{margin:15px 16px 0;border:1px solid #b9d3e0;border-radius:19px;background:linear-gradient(115deg,#ffffffe6,#e3f1f9ee 52%,#e3f6ede6);box-shadow:0 8px 24px #0b2a4a26}
+    .nav-tab{display:flex;align-items:center;justify-content:center;gap:9px;min-height:60px;padding:10px;border:1px solid #bfd9e6;border-bottom:3px solid #a8cbd8;border-radius:13px;color:#15334a;font-weight:800;background:linear-gradient(135deg,#f8fcff,#e6f4fb);transition:transform .15s}
+    .nav-tab:nth-child(2){background:linear-gradient(135deg,#f8fcff,#e6f7f1)}
+    .nav-tab:nth-child(3){background:linear-gradient(135deg,#f8faff,#eef0ff)}
+    .nav-tab:hover{transform:translateY(-2px)}
+    .nav-tab.active{background:linear-gradient(110deg,#19577d,#178a91)!important;color:#fff;border-color:#227d91;border-bottom-color:var(--gold)}
+
+    /* ===== ข้อความบนพื้นหลังเข้ม ===== */
+    .kick{font-size:13px;font-weight:700;letter-spacing:.12em;color:#0b2a45;margin-bottom:.4rem}
+    .h2{font-size:27px;font-weight:800;color:#0b2237}
+    .intro{margin-top:.5rem;font-size:16px;color:#10304b}
+
+    /* ===== การ์ดและสีประจำหัวข้อ ===== */
+    .glass-card{background:linear-gradient(145deg,#fff,var(--t2));border:1.5px solid var(--bd);border-radius:23px;box-shadow:0 12px 32px #0b2a4a22;overflow:hidden}
+    .stripe{height:6px;background:linear-gradient(90deg,var(--c1),var(--c2))}
+    .card-head{padding:17px 22px;border-bottom:1px solid var(--bd);background:linear-gradient(100deg,var(--t2),#fff);border-left:6px solid var(--c1)}
+    .ch{font-size:21px;font-weight:700;color:var(--ink)}
+    .dash-body{padding:20px 23px}
+
+    [data-g="filter"]{--c1:#3730a3;--c2:#7c6ee0;--t2:#e9e6ff;--bd:#c2bbf0}
+    [data-g="solar"]{--c1:#047857;--c2:#5fc46a;--t2:#e1f7e8;--bd:#9fd9b6}
+    [data-g="electric"]{--c1:#1d4ed8;--c2:#38a3f0;--t2:#e0eeff;--bd:#a3c5ee}
+    [data-g="compare"]{--c1:#c2410c;--c2:#f5a623;--t2:#fff0d9;--bd:#efc487}
+    [data-g="trend"]{--c1:#7e22ce;--c2:#d946a8;--t2:#f5e6fb;--bd:#d9b2ec}
+    [data-g="inspect"]{--c1:#0e7490;--c2:#14b8a6;--t2:#d9f5f2;--bd:#8fd5d0}
+    [data-g="exec"]{--c1:#1e3a5f;--c2:#d4a017;--t2:#fdf1d0;--bd:#e5cb7e}
+    [data-g="pmhead"]{--c1:#1e3a5f;--c2:#0e9aa7;--t2:#dff1f6;--bd:#9cc9d6}
+    /* ฟอร์มตรวจเช็ก PM: 4 หัวข้อ 4 สี */
+    [data-g="pm1"]{--c1:#1d4ed8;--c2:#38a3f0;--t2:#e0eeff;--bd:#a3c5ee}
+    [data-g="pm2"]{--c1:#047857;--c2:#5fc46a;--t2:#e1f7e8;--bd:#9fd9b6}
+    [data-g="pm3"]{--c1:#c2410c;--c2:#f5a623;--t2:#fff0d9;--bd:#efc487}
+    [data-g="pm4"]{--c1:#7e22ce;--c2:#d946a8;--t2:#f5e6fb;--bd:#d9b2ec}
+    #pm-form .card-head{background:linear-gradient(100deg,var(--c1),var(--c2));border-left:0;border-bottom:0}
+    #pm-form .ch{color:#fff}
+
+    /* หัวข้อกลุ่มบน Dashboard */
+    .dash-group{margin-top:34px}
+    .group-heading{display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:13px 18px;border-radius:17px;color:#fff;font-size:22px;font-weight:800;background:linear-gradient(100deg,var(--c1),var(--c2));box-shadow:0 8px 20px #0b2a4a33}
+    .group-heading:before{content:"";width:8px;height:30px;flex:none;border-radius:8px;background:#ffffffd9}
+
+    .form-label{display:block;margin-bottom:7px;font-weight:700;color:var(--ink)}
+    .lg{margin-bottom:.5rem;font-weight:700;color:var(--c1)}
+    .field{width:100%;min-height:50px;padding:10px 13px;border:1.5px solid #b7d3dc;border-radius:12px;background:linear-gradient(125deg,#fff,#f4fbff);color:var(--ink)}
+    textarea.field{min-height:92px}
+    :is(button,input,select,textarea):focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+    button:disabled{opacity:.55;cursor:wait}
+
+    /* ===== ตัวเลือกอาคาร: แยกสี ===== */
+    select option[value=""]{background:#eef1f5;color:#52606d}
+    select option[value="อาคารผู้ป่วยใน"]{background:#cfe0ff;color:#0b3a8a;font-weight:700}
+    select option[value="อาคารทันตกรรม"]{background:#c9f3dd;color:#065f46;font-weight:700}
+    select.field[data-tone="in"]{background:linear-gradient(120deg,#e3eeff,#b7d1fb);border-color:#2f6fe0;color:#0b3a8a;font-weight:700}
+    select.field[data-tone="dental"]{background:linear-gradient(120deg,#e3fbee,#b4efd3);border-color:#0fa573;color:#065f46;font-weight:700}
+
+    .primary-button{background:linear-gradient(105deg,#203f88,#1583c4,#0d9db9);color:#fff;font-weight:800;border-radius:14px;box-shadow:0 9px 22px #0a3f5730}
+    .secondary-button{border:1.5px solid #a8cfda;border-radius:14px;background:linear-gradient(110deg,#f2faff,#ddf4ef);color:#12536b;font-weight:800}
+    .notice{padding:12px 15px;border-radius:12px;font-weight:600}
+    .notice.success{background:#e2f7ec;color:#10583d;border:1px solid #90d4b0}
+    .notice.error{background:#fff0f0;color:#942d2c;border:1px solid #ecaaa5}
+    .notice.warning{background:#fff7e3;color:#75500d;border:1px solid #e8c572}
+
+    .kpi-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+    .kpi{min-width:0;min-height:188px;padding:21px;border:1px solid #ffffff35;border-radius:21px;color:#fff;box-shadow:0 11px 25px #102b4635;display:flex;flex-direction:column;transition:transform .2s,box-shadow .2s}
+    .kpi:hover{transform:translateY(-3px);box-shadow:0 17px 31px #102b4640}
+    .kpi-label{font-size:16px;font-weight:700;line-height:1.5}
+    .kpi-number{margin-top:auto;padding-top:16px;font-size:clamp(25px,3.2vw,41px);line-height:1.16;font-weight:900;letter-spacing:-.035em;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+    .kpi-number.is-empty{font-size:clamp(17px,2vw,24px);letter-spacing:0}
+    .kpi-unit{margin-top:3px;font-size:14px;font-weight:700;opacity:.92}
+    .kpi-help{margin-top:9px;font-size:14px;line-height:1.5;opacity:.92}
+    .solar10{background:linear-gradient(135deg,#066d56,#0bb88b)}
+    .solar100{background:linear-gradient(135deg,#075e63,#08a6a5)}
+    .solartotal{background:linear-gradient(135deg,#064b52,#087d70)}
+    .pea{background:linear-gradient(135deg,#17356e,#315feb)}
+    .cost{background:linear-gradient(135deg,#193a70,#2275b7)}
+    .reduction{background:linear-gradient(135deg,#474285,#576ac4)}
+    .saving{background:linear-gradient(135deg,#75531b,#10816b)}
+    .status{background:linear-gradient(135deg,#234263,#3f7490)}
+    .empty{padding:23px;border:1px dashed #accbd4;border-radius:14px;background:#f6fbfd;color:#496273}
+    .chart-scroll,.table-scroll{width:100%;overflow-x:auto;overscroll-behavior-inline:contain}
+    .chart-frame{height:315px;min-width:650px;position:relative}
+    .chart-frame.pm-frame{min-width:420px;height:270px}
+    .chart-frame canvas{width:100%!important;height:100%!important}
+    .data-table{width:100%;min-width:710px;border-collapse:collapse;text-align:left}
+    .data-table th,.data-table td{padding:13px 12px;border-bottom:1px solid #dfebee;vertical-align:top}
+    .data-table th{background:var(--t2);color:#234a60;font-size:13px}
+    .comparison{min-width:690px;width:100%;border:1px solid #172940;border-radius:15px;border-spacing:0;overflow:hidden;text-align:left}
+    .comparison th,.comparison td{padding:14px 17px;border-right:1px solid #172940;border-bottom:1px solid #172940}
+    .comparison tr>*:last-child{border-right:0}
+    .comparison tbody tr:last-child>*{border-bottom:0}
+    .comparison thead th{background:#111e35;color:#fff;font-weight:700}
+    .comparison thead th:nth-child(2){background:#641e22}
+    .comparison thead th:nth-child(3){background:#075044}
+    .comparison tbody th{background:#f8fafc;font-weight:600}
+    .comparison tbody td:nth-child(2){background:#fff0f0;color:#921f28;font-weight:800}
+    .comparison tbody td:nth-child(3){background:linear-gradient(120deg,#e8fbf1,#d7f6e8);color:#075044;font-weight:800}
+    .comparison-caption{margin-bottom:12px;font-weight:700;color:#234a60}
+    .badge{display:inline-block;padding:3px 9px;border-radius:999px;font-size:12px;font-weight:700}
+    .badge.pass{background:#dbf5e7;color:#086443}.badge.fail{background:#fde4e4;color:#981f25}.badge.wait{background:#fff1c8;color:#72520c}
+    .check-row{padding:15px;border:1.5px solid var(--bd);border-radius:17px;background:linear-gradient(120deg,#fff,var(--t2))}
+    .choice{position:relative;display:flex;align-items:center;justify-content:center;min-height:48px;padding:8px;border:1.5px solid #92d5ae;border-radius:12px;background:linear-gradient(110deg,#047857,#0f766e);color:#fff;text-align:center;font-weight:700;cursor:pointer}
+    .choice.bad{background:linear-gradient(110deg,#b91c1c,#7f1d1d);border-color:#641515}
+    .choice input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+    .choice:has(input:checked){box-shadow:0 0 0 3px var(--gold)}
+    .choice:has(input:focus-visible){outline:3px solid var(--gold);outline-offset:2px}
+    .energy-section{border-radius:23px;overflow:hidden;box-shadow:0 12px 32px #0b2a4a26}
+    .solar-section{border:2px solid #8bd6c6;background:linear-gradient(145deg,#f8fffc,#e5f8ee)}
+    .electric-section{border:2px solid #a8c8ee;background:linear-gradient(145deg,#f9fcff,#e9f0ff)}
+    .section-stripe{height:8px;background:linear-gradient(90deg,#087d78,#34c49c,#a0df87)}
+    .electric-section .section-stripe{background:linear-gradient(90deg,#1975ad,#6369bb,#9981d4)}
+    .section-head{padding:20px 24px;border-bottom:1px solid #c3dfde}
+    .group-card{padding:19px;border:1.5px solid;border-radius:18px}
+    .hospital-card{background:linear-gradient(135deg,#fafdff,#dfefff);border-color:#9bc9e9}
+    .residence-card{background:linear-gradient(135deg,#fff,#ece6ff);border-color:#b9aeea}
+    [hidden]{display:none!important}
+    @media(max-width:850px){.kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:600px){.app-shell{padding-top:10px}.site-header{margin:0 10px;border-radius:18px}.nav-region{margin:12px 10px 0}.nav-tab{min-height:71px;flex-direction:column;gap:3px;font-size:12px;padding:6px 2px}.nav-tab svg{width:19px;height:19px}.dash-body{padding:16px}.kpi-grid{grid-template-columns:1fr}.kpi{min-height:155px}.kpi-number{font-size:clamp(28px,8vw,40px)}.group-heading{font-size:19px}}
+    @media(prefers-reduced-motion:reduce){.kpi,.nav-tab{transition:none}}
+  </style>
+</head>
+<body class="w-full">
+<div class="app-shell">
+  <header class="site-header">
+    <div class="max-w-6xl mx-auto px-5 sm:px-8 py-7 flex gap-4 items-start">
+      <div class="w-14 h-14 rounded-2xl bg-[#f5bd4f] text-[#102b46] grid place-items-center shrink-0" aria-hidden="true"><i data-lucide="sun"></i></div>
+      <div class="min-w-0">
+        <p class="font-bold tracking-widest mb-1" style="color:#f5d88a;font-size:12px">SOLAR CARE · ENERGY INTELLIGENCE</p>
+        <h1 class="font-extrabold leading-tight whitespace-pre-line" style="color:#fff;font-size:29px">ระบบตรวจสอบโซลาร์เซลล์และพลังงานไฟฟ้า
+KSK Solar &amp; Power Monitoring System</h1>
+        <p class="mt-2" style="color:#e2f4f5;font-size:15px">ข้อมูลพลังงานและผลตรวจ PM เพื่อการตัดสินใจอย่างมีข้อมูล</p>
+      </div>
+    </div>
+  </header>
+
+  <nav class="nav-region" aria-label="หน้าของระบบ">
+    <div class="max-w-6xl mx-auto px-4 py-4 grid grid-cols-3 gap-2 sm:gap-3">
+      <button type="button" class="nav-tab active" data-view="dashboard" aria-current="page"><i data-lucide="layout-dashboard" aria-hidden="true"></i><span>Dashboard</span></button>
+      <button type="button" class="nav-tab" data-view="inspection"><i data-lucide="clipboard-check" aria-hidden="true"></i><span>ตรวจเช็กระบบ</span></button>
+      <button type="button" class="nav-tab" data-view="energy"><i data-lucide="zap" aria-hidden="true"></i><span>กรอกข้อมูลพลังงาน</span></button>
+    </div>
+  </nav>
+
+  <main class="w-full max-w-6xl mx-auto px-4 sm:px-6 pt-8">
+
+    <!-- ================= DASHBOARD ================= -->
+    <section id="dashboard-view" class="view" aria-labelledby="dashboard-title">
+      <div class="mb-6">
+        <p class="kick">KSK · EXECUTIVE OVERVIEW</p>
+        <h2 id="dashboard-title" class="h2">Dashboard สรุปผลระบบโซลาร์เซลล์และพลังงานไฟฟ้า</h2>
+        <p class="intro">ภาพรวมประสิทธิภาพการผลิตพลังงาน การใช้ไฟ ค่าใช้จ่าย และผลการตรวจเช็กระบบ</p>
+        <p id="dashboard-range" class="mt-3 font-semibold" style="color:#0b2a45" aria-live="polite"></p>
+        <p id="sync-status" class="mt-1 text-sm font-semibold" style="color:#0b2a45" aria-live="polite"></p>
+      </div>
+
+      <section class="glass-card mb-5" data-g="filter" aria-labelledby="filter-title">
+        <div class="stripe"></div>
+        <div class="card-head"><h3 id="filter-title" class="ch">เลือกช่วงข้อมูลและพื้นที่ตรวจ PM</h3></div>
+        <form id="filter-form" class="dash-body grid sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+          <div><label for="filter-month" class="form-label">เดือน</label><select id="filter-month" class="field month-filter"></select></div>
+          <div><label for="filter-year" class="form-label">ปี พ.ศ. (เว้นว่างเพื่อดูทุกปี)</label><input id="filter-year" class="field" type="number" min="1000" max="9999" step="1" inputmode="numeric"></div>
+          <div><label for="filter-building" class="form-label">อาคาร / พื้นที่ — เฉพาะผล PM</label>
+            <select id="filter-building" class="field"><option value="">ทุกอาคาร</option><option value="อาคารผู้ป่วยใน">🏥 อาคารผู้ป่วยใน</option><option value="อาคารทันตกรรม">🦷 อาคารทันตกรรม</option></select></div>
+          <div class="flex gap-2 flex-wrap">
+            <button type="submit" class="primary-button px-4 min-h-12">ใช้ตัวกรอง</button>
+            <button type="button" id="clear-filter" class="secondary-button px-4 min-h-12">ล้างตัวกรอง</button>
+          </div>
+          <p id="filter-error" role="status" class="text-[#a42e30] sm:col-span-2 lg:col-span-4"></p>
+        </form>
+      </section>
+
+      <section class="dash-group" data-g="solar" aria-labelledby="solar-group-title">
+        <h3 id="solar-group-title" class="group-heading">สรุปโซลาร์เซลล์</h3>
+        <div class="kpi-grid">
+          <article class="kpi solar10"><div class="flex items-start gap-2"><i data-lucide="sun-medium" aria-hidden="true"></i><p class="kpi-label">ผลิตไฟฟ้าโซลาร์ ระบบ 10 kW</p></div><p id="kpi-solar-10" class="kpi-number" aria-live="polite"></p><p id="kpi-solar-10-unit" class="kpi-unit"></p><p class="kpi-help">จากข้อมูลการผลิตจริงของระบบ 10 kW</p></article>
+          <article class="kpi solar100"><div class="flex items-start gap-2"><i data-lucide="panels-top-left" aria-hidden="true"></i><p class="kpi-label">ผลิตไฟฟ้าโซลาร์ ระบบ 100 kW</p></div><p id="kpi-solar-100" class="kpi-number" aria-live="polite"></p><p id="kpi-solar-100-unit" class="kpi-unit"></p><p class="kpi-help">จากข้อมูลการผลิตจริงของระบบ 100 kW</p></article>
+          <article class="kpi solartotal"><div class="flex items-start gap-2"><i data-lucide="sun" aria-hidden="true"></i><p class="kpi-label">ผลิตไฟฟ้าจากโซลาร์รวม</p></div><p id="kpi-solar" class="kpi-number" aria-live="polite"></p><p id="kpi-solar-unit" class="kpi-unit"></p><p class="kpi-help">รวมข้อมูลจริงจากระบบที่มีข้อมูล; ตรวจการ์ดแยกเพื่อดูความครบถ้วน</p></article>
+        </div>
+        <section class="glass-card mt-4" aria-labelledby="summary-title">
+          <div class="stripe"></div>
+          <div class="card-head"><h4 id="summary-title" class="ch">สรุปพลังงานตามช่วงที่เลือก</h4></div>
+          <div id="energy-summary" class="dash-body grid sm:grid-cols-3 gap-4" aria-live="polite"></div>
+        </section>
+      </section>
+
+      <section class="dash-group" data-g="electric" aria-labelledby="electric-group-title">
+        <h3 id="electric-group-title" class="group-heading">สรุปการใช้ไฟและค่าใช้จ่าย</h3>
+        <div class="kpi-grid">
+          <article class="kpi pea"><div class="flex items-start gap-2"><i data-lucide="zap" aria-hidden="true"></i><p class="kpi-label">ใช้ไฟจาก PEA</p></div><p id="kpi-pea" class="kpi-number"></p><p id="kpi-pea-unit" class="kpi-unit"></p><p class="kpi-help">รวมหน่วยการใช้โรงพยาบาลและบ้านพักตามช่วงที่เลือก</p></article>
+          <article class="kpi cost"><div class="flex items-start gap-2"><i data-lucide="receipt" aria-hidden="true"></i><p class="kpi-label">ค่าไฟ PEA</p></div><p id="kpi-cost" class="kpi-number"></p><p id="kpi-cost-unit" class="kpi-unit"></p><p class="kpi-help">รวมค่าไฟโรงพยาบาลและบ้านพักที่บันทึก</p></article>
+          <article class="kpi reduction"><div class="flex items-start gap-2"><i data-lucide="trending-down" aria-hidden="true"></i><p class="kpi-label">เปอร์เซ็นต์การลดใช้ไฟ</p></div><p id="kpi-reduction" class="kpi-number"></p><p id="kpi-reduction-unit" class="kpi-unit"></p><p class="kpi-help">โซลาร์ ÷ (โซลาร์ + ไฟ PEA) × 100</p></article>
+          <article class="kpi saving"><div class="flex items-start gap-2"><i data-lucide="coins" aria-hidden="true"></i><p class="kpi-label">ประมาณการเงินที่ประหยัดได้</p></div><p id="kpi-saving" class="kpi-number"></p><p id="kpi-saving-unit" class="kpi-unit"></p><p class="kpi-help">ค่าประมาณการ ไม่ใช่ยอดประหยัดที่ตรวจวัดจริง</p></article>
+        </div>
+        <section class="glass-card mt-4" aria-labelledby="saving-title">
+          <div class="stripe"></div>
+          <div class="dash-body bg-gradient-to-r from-[#edf8f5] to-[#f1f1ff]">
+            <div class="flex flex-wrap justify-between gap-3">
+              <h4 id="saving-title" class="ch" style="font-weight:800;font-size:22px">วิธีคำนวณเงินที่ประหยัดได้</h4>
+              <span class="badge wait self-start" style="font-size:14px">ประมาณการ · ไม่ใช่ข้อมูลตรวจวัด</span>
+            </div>
+            <p id="saving-detail" class="font-extrabold text-[#174d62] mt-4"></p>
+            <p class="mt-2" style="color:#425b6a">คำนวณรายเดือนจากพลังงานโซลาร์ที่ผลิตจริง × (ค่าไฟ PEA ÷ หน่วยไฟ PEA) เฉพาะเดือนที่ข้อมูลครบและหน่วย PEA มากกว่า 0</p>
+            <button type="button" data-go="energy" class="secondary-button mt-4 px-4 min-h-12">กรอกข้อมูลที่จำเป็น →</button>
+          </div>
+        </section>
+      </section>
+
+      <section class="dash-group" data-g="compare" aria-labelledby="comparison-title">
+        <h3 id="comparison-title" class="group-heading">เปรียบเทียบค่าใช้จ่ายรายเดือน</h3>
+        <div class="glass-card">
+          <div class="stripe"></div>
+          <div class="dash-body">
+            <p class="mb-4" style="color:#425b6a">เปรียบเทียบรายเดือน/ปี พ.ศ. ตามตัวกรอง · กรณีไม่มีโซลาร์เป็นค่าประมาณจากข้อมูลการผลิต หน่วยไฟ และอัตราเฉลี่ยของบิล PEA เดือนเดียวกัน ไม่ใช่บิลจริง</p>
+            <p id="comparison-empty" class="empty" hidden>ยังไม่มีข้อมูลพลังงานในช่วงที่เลือกสำหรับแสดงตารางเปรียบเทียบ</p>
+            <div id="comparison-list" class="space-y-6" aria-live="polite"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="dash-group" data-g="trend" aria-labelledby="trends-group-title">
+        <h3 id="trends-group-title" class="group-heading">แนวโน้มและกราฟ</h3>
+        <div class="grid gap-5">
+          <section class="glass-card" aria-labelledby="units-title">
+            <div class="stripe"></div>
+            <div class="card-head"><h4 id="units-title" class="ch">แนวโน้มหน่วยการใช้ไฟฟ้า (Units)</h4></div>
+            <div class="dash-body">
+              <p id="units-empty" class="empty" hidden>ยังไม่มีข้อมูลหน่วยการใช้ไฟสำหรับแสดงแนวโน้ม</p>
+              <div id="units-scroll" class="chart-scroll"><div id="units-frame" class="chart-frame"><canvas id="units-canvas" role="img" aria-label="แนวโน้มหน่วยการใช้ไฟฟ้าตามเดือนและปี พ.ศ."></canvas></div></div>
+            </div>
+          </section>
+          <section class="glass-card" aria-labelledby="cost-title">
+            <div class="stripe"></div>
+            <div class="card-head"><h4 id="cost-title" class="ch">เปรียบเทียบค่าไฟโรงพยาบาลและบ้านพักรายเดือน</h4></div>
+            <div class="dash-body">
+              <p class="mb-4" style="color:#425b6a">เปรียบเทียบค่าไฟโรงพยาบาลและบ้านพักตามเดือน/ปี พ.ศ. ยอดรวมอยู่ใน tooltip และตารางด้านล่าง</p>
+              <p id="cost-empty" class="empty" hidden>ยังไม่มีข้อมูลค่าไฟสำหรับเปรียบเทียบ</p>
+              <div id="cost-scroll" class="chart-scroll"><div id="cost-frame" class="chart-frame"><canvas id="cost-canvas" role="img" aria-label="เปรียบเทียบค่าไฟโรงพยาบาลและบ้านพักรายเดือน"></canvas></div></div>
+              <div class="table-scroll mt-5">
+                <table id="cost-table" class="data-table" hidden>
+                  <thead><tr><th>เดือน/ปี พ.ศ.</th><th>โรงพยาบาล</th><th>บ้านพัก</th><th>รวมค่าไฟ</th><th>ต่างจากเดือนก่อน</th></tr></thead>
+                  <tbody id="cost-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+          <section class="glass-card" aria-labelledby="carbon-title">
+            <div class="stripe"></div>
+            <div class="card-head"><h4 id="carbon-title" class="ch">การลดการปล่อยคาร์บอน</h4></div>
+            <div class="dash-body">
+              <p id="carbon-empty" class="empty"></p>
+              <p class="mt-3" style="color:#425b6a">ค่า CO₂ ที่หลีกเลี่ยงได้จะเป็นค่าประมาณการจาก kWh × emission factor ไม่ใช่ค่าที่ตรวจวัดโดยตรง</p>
+            </div>
+          </section>
+          <section class="glass-card" aria-labelledby="pm-chart-title">
+            <div class="stripe"></div>
+            <div class="card-head"><h4 id="pm-chart-title" class="ch">กราฟสรุปผลการตรวจ PM</h4></div>
+            <div class="dash-body">
+              <p id="pm-chart-empty" class="empty" hidden>ยังไม่มีผลตรวจ PM ตามตัวกรอง</p>
+              <div id="pm-chart-scroll" class="chart-scroll"><div class="chart-frame pm-frame"><canvas id="pm-canvas" role="img" aria-label="จำนวนรายการตรวจผ่าน ไม่ผ่าน และรอตรวจ"></canvas></div></div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="dash-group" data-g="inspect" aria-labelledby="inspection-group-title">
+        <h3 id="inspection-group-title" class="group-heading">ผลการตรวจเช็กระบบ</h3>
+        <div class="grid gap-5">
+          <article class="kpi status">
+            <div class="flex items-start gap-2"><i data-lucide="clipboard-check" aria-hidden="true"></i><p class="kpi-label">สถานะการตรวจ PM</p></div>
+            <p id="kpi-pm" class="kpi-number"></p>
+            <button type="button" data-go="inspection" class="underline text-left mt-3" style="color:#fff">ไปหน้าตรวจเช็กระบบ →</button>
+          </article>
+          <section class="glass-card" aria-labelledby="fault-title">
+            <div class="stripe"></div>
+            <div class="card-head"><h4 id="fault-title" class="ch">สรุปการเสียและสถานะผิดปกติ</h4></div>
+            <div id="fault-content" class="dash-body" aria-live="polite"></div>
+          </section>
+          <section class="glass-card" aria-labelledby="history-title">
+            <div class="stripe"></div>
+            <div class="card-head"><h4 id="history-title" class="ch">ตารางประวัติการตรวจเช็กระบบ</h4></div>
+            <div class="dash-body">
+              <div id="history-empty" class="empty">
+                <p class="mb-3" style="color:#425b6a">ยังไม่มีประวัติการตรวจเช็กระบบตามตัวกรอง</p>
+                <button type="button" data-go="inspection" class="secondary-button px-4 min-h-12">ไปหน้าตรวจเช็กระบบ</button>
+              </div>
+              <div class="table-scroll">
+                <table id="history-table" class="data-table" hidden>
+                  <thead><tr><th>วันที่ตรวจ</th><th>อาคาร</th><th>ผู้ตรวจ</th><th>รายการ</th><th>ผ่าน</th><th>ไม่ผ่าน</th><th>รอตรวจ</th><th>สถานะรวม</th><th>หมายเหตุ</th></tr></thead>
+                  <tbody id="history-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="dash-group" data-g="exec" aria-labelledby="executive-title">
+        <h3 id="executive-title" class="group-heading">ประเด็นสำคัญสำหรับผู้บริหาร</h3>
+        <div class="glass-card">
+          <div class="stripe"></div>
+          <div id="executive-content" class="dash-body space-y-3" aria-live="polite"></div>
+        </div>
+      </section>
+    </section>
+
+    <!-- ================= PM FORM ================= -->
+    <section id="inspection-view" class="view" hidden aria-labelledby="inspection-title">
+      <div class="glass-card mb-5" data-g="pmhead">
+        <div class="stripe"></div>
+        <div class="p-5 sm:p-7">
+          <p class="kick" style="color:#0e5f6a">หน้า 2 จาก 3 · การตรวจเช็กระบบ</p>
+          <h2 id="inspection-title" class="h2" style="color:var(--navy)">แบบฟอร์มตรวจเช็ก PM</h2>
+          <p class="mt-2" style="color:#425b6a">เลือกอาคารและตรวจให้ครบทุกหัวข้อ จากนั้นระบุเจ้าหน้าที่ผู้รับผิดชอบ</p>
+        </div>
+      </div>
+
+      <form id="pm-form" novalidate class="space-y-5">
+        <section class="glass-card" data-g="pm1" aria-labelledby="location-title">
+          <div class="stripe"></div>
+          <div class="card-head"><h3 id="location-title" class="ch">สถานที่ตรวจ</h3></div>
+          <div class="p-5">
+            <label for="inspection-building" class="form-label">เลือกอาคาร *</label>
+            <select id="inspection-building" class="field"><option value="">— เลือกอาคาร —</option><option value="อาคารผู้ป่วยใน">🏥 อาคารผู้ป่วยใน 100 kW</option><option value="อาคารทันตกรรม">🦷 อาคารทันตกรรม 10 kW</option></select>
+            <p id="inspection-building-error" class="text-red-700 mt-1"></p>
+          </div>
+        </section>
+
+        <section class="glass-card" data-g="pm2" aria-labelledby="checks-title">
+          <div class="stripe"></div>
+          <div class="card-head"><h3 id="checks-title" class="ch">รายการตรวจสอบระบบโซลาร์เซลล์</h3></div>
+          <div class="p-4 sm:p-6">
+            <p class="mb-5" style="color:#425b6a">เลือกผลตรวจตามจริงในแต่ละรายการ รายการที่ยังไม่เลือกจะนับเป็นรอตรวจ</p>
+            <div id="check-fields" class="space-y-3">
+              <fieldset class="check-row"><legend class="lg">เบรกเกอร์และตู้ไฟ</legend><div class="grid grid-cols-2 gap-2"><label class="choice"><input type="radio" name="breaker" value="pass"><span>ปกติ · ผ่าน</span></label><label class="choice bad"><input type="radio" name="breaker" value="fail"><span>ไม่ปกติ · พบปัญหา</span></label></div></fieldset>
+              <fieldset class="check-row"><legend class="lg">สายไฟและขั้วต่อ</legend><div class="grid grid-cols-2 gap-2"><label class="choice"><input type="radio" name="wiring" value="pass"><span>ปกติ · ผ่าน</span></label><label class="choice bad"><input type="radio" name="wiring" value="fail"><span>ไม่ปกติ · พบปัญหา</span></label></div></fieldset>
+              <fieldset class="check-row"><legend class="lg">แผงโซลาร์เซลล์</legend><div class="grid grid-cols-2 gap-2"><label class="choice"><input type="radio" name="panel" value="pass"><span>ปกติ · ผ่าน</span></label><label class="choice bad"><input type="radio" name="panel" value="fail"><span>ไม่ปกติ · พบปัญหา</span></label></div></fieldset>
+              <fieldset class="check-row"><legend class="lg">ฝุ่นและคราบสกปรกบนแผง</legend><div class="grid grid-cols-2 gap-2"><label class="choice"><input type="radio" name="dirt" value="pass"><span>ปกติ · ผ่าน</span></label><label class="choice bad"><input type="radio" name="dirt" value="fail"><span>ไม่ปกติ · พบปัญหา</span></label></div></fieldset>
+              <fieldset class="check-row"><legend class="lg">การล้างแผง</legend>
+                <div class="grid grid-cols-2 gap-2"><label class="choice"><input type="radio" name="panelCleaning" value="pass"><span>สะอาด</span></label><label class="choice bad"><input type="radio" name="panelCleaning" value="fail"><span>ควรดำเนินการล้าง</span></label></div>
+                <label class="flex gap-3 items-center mt-4"><input id="heavyDirt" type="checkbox" class="w-5 h-5 accent-[#078f88]"><span>พบคราบหนักบนแผง</span></label>
+                <div id="cleaning-note-wrap" hidden class="mt-3">
+                  <label for="cleaningNote" class="form-label">หมายเหตุการล้างแผง / คราบหนัก *</label>
+                  <input id="cleaningNote" class="field" maxlength="200" placeholder="ระบุสาเหตุหรือสิ่งที่ต้องดำเนินการ">
+                  <p id="cleaning-note-error" class="text-red-700 mt-1"></p>
+                </div>
+              </fieldset>
+              <fieldset class="check-row"><legend class="lg">อินเวอร์เตอร์และหน้าจอแสดงผล</legend><div class="grid grid-cols-2 gap-2"><label class="choice"><input type="radio" name="inverter" value="pass"><span>ปกติ · ผ่าน</span></label><label class="choice bad"><input type="radio" name="inverter" value="fail"><span>ไม่ปกติ · พบปัญหา</span></label></div></fieldset>
+              <fieldset class="check-row"><legend class="lg">โครงยึดแผงและอุปกรณ์ภายนอก</legend><div class="grid grid-cols-2 gap-2"><label class="choice"><input type="radio" name="mounting" value="pass"><span>ปกติ · ผ่าน</span></label><label class="choice bad"><input type="radio" name="mounting" value="fail"><span>ไม่ปกติ · พบปัญหา</span></label></div></fieldset>
+              <fieldset class="check-row"><legend class="lg">น้ำรั่ว เงาบัง หรือสิ่งแปลกปลอม</legend><div class="grid grid-cols-2 gap-2"><label class="choice"><input type="radio" name="obstruction" value="pass"><span>ปกติ · ผ่าน</span></label><label class="choice bad"><input type="radio" name="obstruction" value="fail"><span>ไม่ปกติ · พบปัญหา</span></label></div></fieldset>
+              <fieldset class="check-row"><legend class="lg">ป้ายเตือนและความเรียบร้อยของพื้นที่</legend><div class="grid grid-cols-2 gap-2"><label class="choice"><input type="radio" name="safetyArea" value="pass"><span>ปกติ · ผ่าน</span></label><label class="choice bad"><input type="radio" name="safetyArea" value="fail"><span>ไม่ปกติ · พบปัญหา</span></label></div></fieldset>
+            </div>
+          </div>
+        </section>
+
+        <section class="glass-card" data-g="pm3">
+          <div class="stripe"></div>
+          <div class="card-head"><h3 class="ch">สถานะระบบและหมายเหตุ</h3></div>
+          <div class="p-5 space-y-4">
+            <fieldset>
+              <legend class="form-label">สถานะระบบ</legend>
+              <div class="grid grid-cols-2 gap-3"><label class="choice"><input type="radio" name="status" value="normal"><span>ปกติ</span></label><label class="choice bad"><input type="radio" name="status" value="abnormal"><span>ไม่ปกติ</span></label></div>
+            </fieldset>
+            <div><label for="note" class="form-label">หมายเหตุเพิ่มเติม</label><textarea id="note" class="field" maxlength="500" placeholder="รายละเอียดเพิ่มเติมจากการตรวจเช็ก"></textarea></div>
+          </div>
+        </section>
+
+        <section class="glass-card" data-g="pm4">
+          <div class="stripe"></div>
+          <div class="card-head"><h3 class="ch">เจ้าหน้าที่ผู้รับผิดชอบการตรวจสอบ</h3></div>
+          <div class="p-5">
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div><label for="technician" class="form-label">ชื่อ-นามสกุลผู้ตรวจ *</label><input id="technician" class="field" maxlength="100" placeholder="กรอกชื่อ-นามสกุลผู้ตรวจ" value="นายกรวิก ละกักดี"></div>
+              <div><label for="inspectorPosition" class="form-label">ตำแหน่งงาน *</label><input id="inspectorPosition" class="field" maxlength="100" placeholder="กรอกตำแหน่งงาน" value="นายช่างเทคนิค"></div>
+            </div>
+            <div id="co-list" class="space-y-3 mt-4"></div>
+            <button id="add-co" type="button" class="secondary-button px-4 py-3 mt-4">+ เพิ่มผู้ตรวจสอบเพิ่มเติม</button>
+            <p id="current-time" class="mt-5 rounded-lg bg-[#edf4ff] px-4 py-3 font-semibold"></p>
+          </div>
+        </section>
+
+        <button type="submit" class="primary-button w-full min-h-[62px] px-5" style="font-size:19px">บันทึกผลตรวจ PM</button>
+        <div id="pm-notice" role="status" aria-live="polite" class="notice hidden"></div>
+      </form>
+    </section>
+
+    <!-- ================= ENERGY ================= -->
+    <section id="energy-view" class="view" hidden aria-labelledby="energy-title">
+      <div class="mb-7">
+        <p class="kick">KSK · ENERGY RECORD</p>
+        <h2 id="energy-title" class="h2">กรอกข้อมูลพลังงานรายเดือน</h2>
+        <p class="intro">กรอกข้อมูลโซลาร์เซลล์ โรงพยาบาล และบ้านพักแยกกันตามเดือนและปี พ.ศ.</p>
+      </div>
+      <div class="space-y-6">
+        <section class="energy-section solar-section" aria-labelledby="solar-title">
+          <div class="section-stripe"></div>
+          <div class="section-head">
+            <h3 id="solar-title" class="font-extrabold" style="color:#086b64;font-size:23px">ข้อมูลโซลาร์เซลล์</h3>
+            <p class="mt-2" style="color:#326c61;font-size:15px">ข้อมูลการผลิตและการใช้พลังงานจากระบบโซลาร์เซลล์</p>
+          </div>
+          <form id="solar-form" novalidate class="p-5 sm:p-7">
+            <div class="grid md:grid-cols-2 gap-4">
+              <div><label for="solar-month" class="form-label">เดือน</label><select id="solar-month" class="field month-select"></select><p id="solar-month-error" class="text-red-700"></p></div>
+              <div><label for="solar-year" class="form-label">ปี พ.ศ.</label><input id="solar-year" class="field buddhist-year" type="number" min="1000" max="9999" step="1"><p id="solar-year-error" class="text-red-700"></p></div>
+              <div><label for="solar-10" class="form-label">ระบบ 10 kW (ผลิตจริง, kWh)</label><input id="solar-10" class="field" type="number" min="0" step="any"><p id="solar-10-error" class="text-red-700"></p></div>
+              <div><label for="solar-100" class="form-label">ระบบ 100 kW (ผลิตจริง, kWh)</label><input id="solar-100" class="field" type="number" min="0" step="any"><p id="solar-100-error" class="text-red-700"></p></div>
+              <div><label for="solar-use-10" class="form-label">ระบบ 10 kW (ปริมาณการใช้, kWh)</label><input id="solar-use-10" class="field" type="number" min="0" step="any"><p id="solar-use-10-error" class="text-red-700"></p></div>
+              <div><label for="solar-use-100" class="form-label">ระบบ 100 kW (ปริมาณการใช้, kWh)</label><input id="solar-use-100" class="field" type="number" min="0" step="any"><p id="solar-use-100-error" class="text-red-700"></p></div>
+              <div><label for="solar-holidays" class="form-label">จำนวนวันหยุดงาน (วัน)</label><input id="solar-holidays" class="field" type="number" min="0" step="1"><p id="solar-holidays-error" class="text-red-700"></p></div>
+            </div>
+            <button type="submit" class="primary-button min-h-12 px-6 mt-4">บันทึกค่าพลังงานโซลาร์เซลล์</button>
+            <div id="solar-notice" role="status" class="notice hidden mt-4"></div>
+            <div id="solar-confirm" hidden class="flex flex-wrap gap-2 mt-3">
+              <button type="button" data-confirm="solar" class="primary-button px-4 min-h-12">ยืนยันอัปเดตรายการเดิม</button>
+              <button type="button" data-cancel="solar" class="secondary-button px-4 min-h-12">ยกเลิก</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="energy-section electric-section" aria-labelledby="electric-title">
+          <div class="section-stripe"></div>
+          <div class="section-head">
+            <h3 id="electric-title" class="font-extrabold" style="color:#244d93;font-size:23px">ข้อมูลพลังงานไฟฟ้า</h3>
+            <p class="mt-2" style="color:#466492;font-size:15px">กรอกและบันทึกข้อมูลโรงพยาบาลกับบ้านพักแยกกัน</p>
+          </div>
+          <div class="p-5 sm:p-7 grid gap-5">
+            <section class="group-card hospital-card" aria-labelledby="hospital-title">
+              <h4 id="hospital-title" class="font-extrabold mb-4" style="color:#176293;font-size:21px">ไฟฟ้าโรงพยาบาล</h4>
+              <form id="hospital-form" novalidate>
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div><label for="hospital-month" class="form-label">เดือน</label><select id="hospital-month" class="field month-select"></select><p id="hospital-month-error" class="text-red-700"></p></div>
+                  <div><label for="hospital-year" class="form-label">ปี พ.ศ.</label><input id="hospital-year" class="field buddhist-year" type="number" min="1000" max="9999" step="1"><p id="hospital-year-error" class="text-red-700"></p></div>
+                  <div><label for="hospital-units" class="form-label">หน่วยการใช้ (Units)</label><input id="hospital-units" class="field" type="number" min="0" step="any"><p id="hospital-units-error" class="text-red-700"></p></div>
+                  <div><label for="hospital-cost" class="form-label">ค่าไฟ (บาท)</label><input id="hospital-cost" class="field" type="number" min="0" step="any"><p id="hospital-cost-error" class="text-red-700"></p></div>
+                </div>
+                <button type="submit" class="primary-button min-h-12 px-6 mt-4">บันทึกค่าพลังงานโรงพยาบาล</button>
+                <div id="hospital-notice" role="status" class="notice hidden mt-4"></div>
+                <div id="hospital-confirm" hidden class="flex flex-wrap gap-2 mt-3">
+                  <button type="button" data-confirm="hospital" class="primary-button px-4 min-h-12">ยืนยันอัปเดตรายการเดิม</button>
+                  <button type="button" data-cancel="hospital" class="secondary-button px-4 min-h-12">ยกเลิก</button>
+                </div>
+              </form>
+            </section>
+            <section class="group-card residence-card" aria-labelledby="residence-title">
+              <h4 id="residence-title" class="font-extrabold mb-4" style="color:#5949a1;font-size:21px">ไฟฟ้าบ้านพัก</h4>
+              <form id="residence-form" novalidate>
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div><label for="residence-month" class="form-label">เดือน</label><select id="residence-month" class="field month-select"></select><p id="residence-month-error" class="text-red-700"></p></div>
+                  <div><label for="residence-year" class="form-label">ปี พ.ศ.</label><input id="residence-year" class="field buddhist-year" type="number" min="1000" max="9999" step="1"><p id="residence-year-error" class="text-red-700"></p></div>
+                  <div><label for="residence-units" class="form-label">หน่วยการใช้ (Units)</label><input id="residence-units" class="field" type="number" min="0" step="any"><p id="residence-units-error" class="text-red-700"></p></div>
+                  <div><label for="residence-cost" class="form-label">ค่าไฟ (บาท)</label><input id="residence-cost" class="field" type="number" min="0" step="any"><p id="residence-cost-error" class="text-red-700"></p></div>
+                </div>
+                <button type="submit" class="primary-button min-h-12 px-6 mt-4">บันทึกค่าพลังงานบ้านพัก</button>
+                <div id="residence-notice" role="status" class="notice hidden mt-4"></div>
+                <div id="residence-confirm" hidden class="flex flex-wrap gap-2 mt-3">
+                  <button type="button" data-confirm="residence" class="primary-button px-4 min-h-12">ยืนยันอัปเดตรายการเดิม</button>
+                  <button type="button" data-cancel="residence" class="secondary-button px-4 min-h-12">ยกเลิก</button>
+                </div>
+              </form>
+            </section>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+</div>
+
+<template id="co-template">
+  <div class="co-row grid sm:grid-cols-[1fr_1fr_auto] gap-3 items-end">
+    <div><label class="form-label">ชื่อ-นามสกุลผู้ตรวจร่วม</label><input class="field co-name-input" maxlength="100" placeholder="ชื่อ-นามสกุล"></div>
+    <div><label class="form-label">ตำแหน่งงาน</label><input class="field co-position-input" maxlength="100" placeholder="ตำแหน่งงาน"></div>
+    <button type="button" class="secondary-button min-h-[50px] px-3">ลบ</button>
+  </div>
+</template>
+
+<script>
+(() => {
+  /* ============================================================
+     ตั้งค่า: วาง URL ของ Web App ที่ได้จาก Google Apps Script (ลงท้าย /exec)
+     ============================================================ */
+  const API_URL = "PASTE_YOUR_WEB_APP_URL_HERE";
+
+  const $=id=>document.getElementById(id);
+  const months=["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+  const state={energyRecords:[],inspections:[]};
+  const pending={solar:null,hospital:null,residence:null};
+  const charts={units:null,cost:null,pm:null};
+  const fields={
+    solar:{"solar-10":"produced10Kwh","solar-100":"produced100Kwh","solar-use-10":"used10Kwh","solar-use-100":"used100Kwh","solar-holidays":"holidays"},
+    hospital:{"hospital-units":"units","hospital-cost":"costBaht"},
+    residence:{"residence-units":"units","residence-cost":"costBaht"}
+  };
+  const names={solar:"โซลาร์เซลล์",hospital:"โรงพยาบาล",residence:"บ้านพัก"};
+  const checkNames={breaker:"เบรกเกอร์และตู้ไฟ",wiring:"สายไฟและขั้วต่อ",panel:"แผงโซลาร์เซลล์",dirt:"ฝุ่นและคราบสกปรกบนแผง",panelCleaning:"การล้างแผง",inverter:"อินเวอร์เตอร์และหน้าจอแสดงผล",mounting:"โครงยึดแผงและอุปกรณ์ภายนอก",obstruction:"น้ำรั่ว เงาบัง หรือสิ่งแปลกปลอม",safetyArea:"ป้ายเตือนและความเรียบร้อยของพื้นที่"};
+  const fmt=n=>new Intl.NumberFormat("th-TH",{maximumFractionDigits:2}).format(n);
+  const money=n=>`${fmt(n)} บาท`;
+  const empty="ยังไม่มีข้อมูล";
+  const currentYear=new Date().getFullYear()+543;
+  let filters={month:"",year:"",building:""};
+
+  /* ---------- เชื่อมต่อ Google Apps Script ---------- */
+  const apiReady=()=>/^https:\/\/script\.google\.com\//.test(API_URL);
+  async function api(payload){
+    if(!apiReady())throw new Error("ยังไม่ได้ตั้งค่า API_URL");
+    // ใช้ text/plain เพื่อไม่ให้เบราว์เซอร์ส่ง preflight (Apps Script ไม่รองรับ OPTIONS)
+    const res=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload)});
+    if(!res.ok)throw new Error("HTTP "+res.status);
+    const data=await res.json();
+    if(!data.ok)throw new Error(data.error||"เกิดข้อผิดพลาด");
+    return data;
+  }
+  async function loadAll(){
+    const status=$("sync-status");
+    if(!apiReady()){status.textContent="⚠️ ยังไม่ได้เชื่อม Google Sheet (ตั้งค่า API_URL) — ข้อมูลที่กรอกจะอยู่ในหน้านี้ชั่วคราวเท่านั้น";return}
+    status.textContent="กำลังโหลดข้อมูลจาก Google Sheet...";
+    try{
+      const res=await fetch(API_URL+"?action=getAll");
+      const data=await res.json();
+      if(!data.ok)throw new Error(data.error||"เกิดข้อผิดพลาด");
+      state.energyRecords=data.energyRecords||[];state.inspections=data.inspections||[];
+      status.textContent="✅ เชื่อมต่อ Google Sheet แล้ว";renderDashboard();
+    }catch(e){status.textContent="❌ โหลดข้อมูลไม่สำเร็จ: "+e.message}
+  }
+  const savedSuffix=res=>apiReady()?(res&&res.telegram===true?" ลง Google Sheet และแจ้ง Telegram แล้ว":res&&res.telegram===false?" ลง Google Sheet แล้ว (ส่ง Telegram ไม่สำเร็จ — ดู Log ใน Apps Script)":" ลง Google Sheet แล้ว"):" ในหน้านี้แล้ว (ยังไม่ได้เชื่อม Google Sheet)";
+
+  function monthOptions(select,all){select.add(new Option(all?"ทุกเดือน":"— เลือกเดือน —",""));months.forEach((m,i)=>select.add(new Option(m,String(i+1))))}
+  document.querySelectorAll(".month-select").forEach(el=>{monthOptions(el,false);el.value=String(new Date().getMonth()+1)});
+  document.querySelectorAll(".month-filter").forEach(el=>monthOptions(el,true));
+  document.querySelectorAll(".buddhist-year").forEach(el=>el.value=currentYear);
+  function showView(view){
+    document.querySelectorAll(".view").forEach(el=>el.hidden=el.id!==`${view}-view`);
+    document.querySelectorAll(".nav-tab").forEach(button=>{const active=button.dataset.view===view;button.classList.toggle("active",active);if(active)button.setAttribute("aria-current","page");else button.removeAttribute("aria-current")});
+    if(view==="dashboard")renderDashboard();
+  }
+  document.querySelectorAll(".nav-tab").forEach(button=>button.addEventListener("click",()=>showView(button.dataset.view)));
+  document.querySelectorAll("[data-go]").forEach(button=>button.addEventListener("click",()=>showView(button.dataset.go)));
+  function notify(id,message,type="success"){const el=$(id);el.textContent=message;el.className=`notice ${type} mt-4`}
+  function recordKey(row){return `${row.kind}|${row.year}|${row.month}`}
+  function clearPending(kind){pending[kind]=null;$(`${kind}-confirm`).hidden=true}
+  function validateEnergy(kind){
+    const ids=[`${kind}-month`,`${kind}-year`,...Object.keys(fields[kind])];
+    ids.forEach(id=>{$(`${id}-error`).textContent="";$(id).removeAttribute("aria-invalid")});
+    let first=null;
+    function error(id,message){$(`${id}-error`).textContent=message;$(id).setAttribute("aria-invalid","true");first||=$(id)}
+    const month=$(`${kind}-month`).value,yearText=$(`${kind}-year`).value.trim();
+    if(!month)error(`${kind}-month`,"กรุณาเลือกเดือน");
+    if(!/^[0-9]{4}$/.test(yearText)||Number(yearText)<1000)error(`${kind}-year`,"กรุณากรอกปี พ.ศ. 4 หลัก");
+    const values={};
+    for(const [id,key] of Object.entries(fields[kind])){
+      const raw=$(id).value.trim(),number=raw===""?null:Number(raw);
+      if(raw!==""&&(!Number.isFinite(number)||number<0||(key==="holidays"&&!Number.isInteger(number))))error(id,"กรุณากรอกตัวเลขที่ไม่ติดลบ");
+      values[key]=number;
+    }
+    if(Object.values(values).every(v=>v===null))error(Object.keys(fields[kind])[0],"กรุณากรอกข้อมูลอย่างน้อยหนึ่งช่อง");
+    if(first){first.focus();return null}
+    return {kind,month:Number(month),year:Number(yearText),...values,savedAt:new Date().toISOString()};
+  }
+  async function commitEnergy(kind,row){
+    const button=$(`${kind}-form`).querySelector('button[type="submit"]');
+    button.disabled=true;notify(`${kind}-notice`,"กำลังบันทึก...","warning");
+    try{
+      const res=apiReady()?await api({action:"saveEnergy",record:row}):null;
+      const index=state.energyRecords.findIndex(item=>recordKey(item)===recordKey(row));
+      if(index<0)state.energyRecords.push(row);else state.energyRecords[index]=row;
+      clearPending(kind);
+      notify(`${kind}-notice`,`${index<0?"บันทึก":"อัปเดต"}ข้อมูล${names[kind]}${savedSuffix(res)}`,apiReady()&&res.telegram===false?"warning":"success");
+      renderDashboard();
+    }catch(e){notify(`${kind}-notice`,"บันทึกไม่สำเร็จ: "+e.message,"error")}
+    finally{button.disabled=false}
+  }
+  for(const kind of Object.keys(fields)){
+    const form=$(`${kind}-form`);
+    form.addEventListener("submit",event=>{
+      event.preventDefault();clearPending(kind);
+      const row=validateEnergy(kind);
+      if(!row)return notify(`${kind}-notice`,"กรุณาตรวจสอบช่องที่มีข้อความผิดพลาด","error");
+      if(state.energyRecords.some(item=>recordKey(item)===recordKey(row))){
+        pending[kind]=row;$(`${kind}-confirm`).hidden=false;
+        return notify(`${kind}-notice`,"มีข้อมูลเดือนและปี พ.ศ. นี้แล้ว โปรดยืนยันก่อนอัปเดต","warning");
+      }
+      commitEnergy(kind,row);
+    });
+    form.addEventListener("input",()=>clearPending(kind));
+    form.addEventListener("change",()=>clearPending(kind));
+  }
+  document.querySelectorAll("[data-confirm]").forEach(button=>button.addEventListener("click",()=>{
+    const kind=button.dataset.confirm,expected=pending[kind];if(!expected)return;
+    const row=validateEnergy(kind);
+    if(!row){clearPending(kind);return notify(`${kind}-notice`,"กรุณาตรวจสอบข้อมูลและกดบันทึกใหม่","error")}
+    if(recordKey(row)!==recordKey(expected)){clearPending(kind);return notify(`${kind}-notice`,"เดือนหรือปีเปลี่ยนไป กรุณากดบันทึกใหม่","warning")}
+    commitEnergy(kind,row);
+  }));
+  document.querySelectorAll("[data-cancel]").forEach(button=>button.addEventListener("click",()=>{const kind=button.dataset.cancel;clearPending(kind);notify(`${kind}-notice`,"ยกเลิกการอัปเดตแล้ว ค่าที่กรอกยังอยู่","warning")}));
+
+  const pmForm=$("pm-form");
+  const selected=name=>pmForm.querySelector(`input[name="${name}"]:checked`)?.value||"";
+  function updateCleaningNote(){const visible=selected("panelCleaning")==="fail"||$("heavyDirt").checked;$("cleaning-note-wrap").hidden=!visible;if(!visible){$("cleaningNote").value="";$("cleaning-note-error").textContent=""}}
+  pmForm.addEventListener("change",event=>{if(event.target.name==="panelCleaning"||event.target.id==="heavyDirt")updateCleaningNote()});
+  $("add-co").addEventListener("click",()=>{
+    const fragment=$("co-template").content.cloneNode(true),uid=`co-${Date.now()}-${Math.random().toString(36).slice(2,6)}`;
+    fragment.querySelectorAll("input").forEach((input,index)=>{input.id=`${uid}-${index}`;fragment.querySelectorAll("label")[index].htmlFor=input.id});
+    fragment.querySelector("button").addEventListener("click",event=>event.currentTarget.closest(".co-row").remove());
+    $("co-list").appendChild(fragment);$("co-list").lastElementChild.querySelector("input").focus();
+  });
+  pmForm.addEventListener("submit",async event=>{
+    event.preventDefault();
+    const building=$("inspection-building").value,technician=$("technician").value.trim(),position=$("inspectorPosition").value.trim();
+    $("inspection-building-error").textContent=building?"":"กรุณาเลือกอาคาร";
+    if(!building||!technician||!position){notify("pm-notice","กรุณาเลือกอาคารและกรอกชื่อกับตำแหน่งผู้ตรวจ","error");(building?(!technician?$("technician"):$("inspectorPosition")):$("inspection-building")).focus();return}
+    if(!$("cleaning-note-wrap").hidden&&!$("cleaningNote").value.trim()){$("cleaning-note-error").textContent="กรุณาระบุรายละเอียดที่ต้องติดตาม";$("cleaningNote").focus();return notify("pm-notice","กรุณาระบุหมายเหตุการล้างแผงหรือคราบหนัก","error")}
+    $("cleaning-note-error").textContent="";
+    const checks=Object.fromEntries(Object.keys(checkNames).map(key=>[key,selected(key)||"pending"]));
+    const coInspectors=[...$("co-list").querySelectorAll(".co-row")].map(row=>({name:row.querySelector(".co-name-input").value.trim(),position:row.querySelector(".co-position-input").value.trim()})).filter(person=>person.name||person.position);
+    const record={id:`${Date.now()}-${Math.random().toString(36).slice(2)}`,building,inspectionDate:new Date().toISOString(),technician,inspectorPosition:position,coInspectors,checks,heavyDirt:$("heavyDirt").checked,status:selected("status")||"pending",note:[$("cleaningNote").value.trim(),$("note").value.trim()].filter(Boolean).join(" · ")};
+    const button=pmForm.querySelector('button[type="submit"]');
+    button.disabled=true;notify("pm-notice","กำลังบันทึก...","warning");
+    try{
+      const res=apiReady()?await api({action:"saveInspection",record}):null;
+      state.inspections.unshift(record);
+      notify("pm-notice",`บันทึกผลตรวจ PM${savedSuffix(res)}`,apiReady()&&res.telegram===false?"warning":"success");
+      renderDashboard();
+    }catch(e){notify("pm-notice","บันทึกไม่สำเร็จ: "+e.message,"error")}
+    finally{button.disabled=false}
+  });
+  function refreshTime(){$("current-time").textContent=`วันเวลาปัจจุบัน: ${new Intl.DateTimeFormat("th-TH-u-ca-buddhist",{timeZone:"Asia/Bangkok",dateStyle:"full",timeStyle:"short"}).format(new Date())}`}
+  refreshTime();setInterval(refreshTime,60000);
+  $("filter-form").addEventListener("submit",event=>{
+    event.preventDefault();const year=$("filter-year").value.trim();
+    if(year&&(!/^[0-9]{4}$/.test(year)||Number(year)<1000)){$("filter-error").textContent="กรุณากรอกปี พ.ศ. 4 หลัก";$("filter-year").focus();return}
+    $("filter-error").textContent="";filters={month:$("filter-month").value,year,building:$("filter-building").value};renderDashboard();
+  });
+  $("clear-filter").addEventListener("click",()=>{$("filter-form").reset();$("filter-error").textContent="";filters={month:"",year:"",building:""};renderDashboard()});
+  $("filter-form").addEventListener("reset",()=>setTimeout(()=>$("filter-building").dispatchEvent(new Event("change")),0));
+
+  /* ---------- สีตามอาคาร ---------- */
+  const toneOf=v=>v==="อาคารผู้ป่วยใน"?"in":v==="อาคารทันตกรรม"?"dental":"";
+  ["inspection-building","filter-building"].forEach(id=>{const el=$(id),apply=()=>{el.dataset.tone=toneOf(el.value)};el.addEventListener("change",apply);apply()});
+
+  function make(tag,text,className=""){const el=document.createElement(tag);el.textContent=text;el.className=className;return el}
+  function energyRows(){return state.energyRecords.filter(row=>(!filters.month||String(row.month)===filters.month)&&(!filters.year||String(row.year)===filters.year))}
+  function pmRows(){return state.inspections.filter(row=>{const date=new Date(row.inspectionDate);return(!filters.month||String(date.getMonth()+1)===filters.month)&&(!filters.year||String(date.getFullYear()+543)===filters.year)&&(!filters.building||row.building===filters.building)})}
+  function pmCounts(rows){const result={pass:0,fail:0,pending:0};rows.forEach(row=>Object.values(row.checks).forEach(value=>{if(value in result)result[value]++}));return result}
+  function monthName(month,year){return `${months[month-1]} ${year}`}
+  function grouped(rows){const map=new Map();rows.forEach(row=>{const key=`${row.year}-${String(row.month).padStart(2,"0")}`;if(!map.has(key))map.set(key,{key,year:row.year,month:row.month});map.get(key)[row.kind]=row});return [...map.values()].sort((a,b)=>a.key.localeCompare(b.key))}
+  function sumPresent(values){const present=values.filter(v=>v!==null&&v!==undefined);return present.length?present.reduce((a,b)=>a+b,0):null}
+  function solarProduced(row){return row?sumPresent([row.produced10Kwh,row.produced100Kwh]):null}
+  function peaUnits(group){return sumPresent([group.hospital?.units,group.residence?.units])}
+  function peaCost(group){return sumPresent([group.hospital?.costBaht,group.residence?.costBaht])}
+  function estimate(group){const solar=solarProduced(group.solar),units=peaUnits(group),cost=peaCost(group);return solar!==null&&units!==null&&units>0&&cost!==null?solar*(cost/units):null}
+  function kpi(id,value,unit){const el=$(id),available=value!==null&&value!==undefined;el.textContent=available?fmt(value):id.includes("saving")||id.includes("reduction")?"ยังคำนวณไม่ได้":empty;el.classList.toggle("is-empty",!available);$(`${id}-unit`).textContent=available?unit:""}
+  function destroyChart(key){if(charts[key]){charts[key].destroy();charts[key]=null}}
+  function chartDefaults(){Chart.defaults.font.family="Prompt";Chart.defaults.color="#36546c";Chart.defaults.plugins.legend.labels.font={family:"Prompt",size:12,weight:"600"}}
+  function chartArea(key,hasData){$(`${key}-empty`).hidden=hasData;$(key==="pm-chart"?"pm-chart-scroll":`${key}-scroll`).hidden=!hasData;if(!hasData)destroyChart(key)}
+  function renderUnits(groups){
+    const points=groups.filter(g=>g.hospital?.units!=null||g.residence?.units!=null);chartArea("units",points.length>0);if(!points.length||!window.Chart)return;
+    const years=[...new Set(points.map(g=>g.year))].sort((a,b)=>a-b),labels=filters.month?[Number(filters.month)]:[...new Set(points.map(g=>g.month))].sort((a,b)=>a-b),datasets=[];
+    for(const year of years)for(const [kind,label,color,dash] of [["hospital","โรงพยาบาล","#307bf0",[]],["residence","บ้านพัก","#eb5849",[6,3]]]){
+      const values=labels.map(month=>points.find(g=>g.year===year&&g.month===month)?.[kind]?.units??null);
+      if(values.every(v=>v===null))continue;
+      datasets.push({label:`${label} · ปี ${year}`,data:values,borderColor:color,backgroundColor:color,borderDash:years.length>1?(dash.length?dash:[8,years.indexOf(year)%3*3+3]):dash,borderWidth:3,pointRadius:5,pointBackgroundColor:color,pointBorderColor:"#fff",pointBorderWidth:2,spanGaps:false,tension:.25});
+    }
+    $("units-frame").style.width=`${Math.max(650,labels.length*74+130)}px`;destroyChart("units");chartDefaults();
+    charts.units=new Chart($("units-canvas"),{type:"line",data:{labels:labels.map(m=>months[m-1]),datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:"nearest",intersect:false},plugins:{legend:{position:"bottom"},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${fmt(c.parsed.y)} Units`}}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,title:{display:true,text:"Units"},ticks:{callback:v=>fmt(v)}}}}});
+  }
+  function renderCost(groups){
+    const items=groups.filter(g=>peaCost(g)!==null);chartArea("cost",items.length>0);$("cost-table").hidden=!items.length;$("cost-tbody").replaceChildren();
+    items.forEach((g,i)=>{const prev=items[i-1],diff=prev&&g.year*12+g.month-(prev.year*12+prev.month)===1?peaCost(g)-peaCost(prev):null,tr=document.createElement("tr");[monthName(g.month,g.year),g.hospital?.costBaht==null?"—":money(g.hospital.costBaht),g.residence?.costBaht==null?"—":money(g.residence.costBaht),money(peaCost(g)),diff===null?"ยังเปรียบเทียบไม่ได้":`${diff>0?"+":""}${money(diff)}`].forEach(v=>tr.appendChild(make("td",v)));$("cost-tbody").appendChild(tr)});
+    if(!items.length||!window.Chart)return;
+    $("cost-frame").style.width=`${Math.max(650,items.length*92+120)}px`;destroyChart("cost");chartDefaults();
+    charts.cost=new Chart($("cost-canvas"),{type:"bar",data:{labels:items.map(g=>monthName(g.month,g.year)),datasets:[{label:"โรงพยาบาล",data:items.map(g=>g.hospital?.costBaht??null),backgroundColor:"#307bf0",borderRadius:5,maxBarThickness:32},{label:"บ้านพัก",data:items.map(g=>g.residence?.costBaht??null),backgroundColor:"#eb5849",borderRadius:5,maxBarThickness:32}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:"index",intersect:false},plugins:{legend:{position:"bottom"},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${money(c.parsed.y)}`,footer:cs=>`รวมรายการที่มีข้อมูล: ${money(peaCost(items[cs[0].dataIndex]))}`}}},scales:{x:{ticks:{maxRotation:45,minRotation:0}},y:{beginAtZero:true,title:{display:true,text:"ค่าไฟ (บาท)"},ticks:{callback:v=>fmt(v)}}}}});
+  }
+  function renderPMChart(inspections,counts){
+    chartArea("pm-chart",inspections.length>0);if(!inspections.length||!window.Chart)return;destroyChart("pm");chartDefaults();
+    charts.pm=new Chart($("pm-canvas"),{type:"bar",data:{labels:["ผ่าน","ไม่ผ่าน","รอตรวจ"],datasets:[{label:"จำนวนรายการตรวจ",data:[counts.pass,counts.fail,counts.pending],backgroundColor:["#087253","#a82b32","#d3a431"],borderRadius:8,maxBarThickness:95}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${fmt(c.parsed.y)} รายการ`}}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,ticks:{precision:0,callback:v=>Number.isInteger(v)?fmt(v):""},title:{display:true,text:"จำนวนรายการตรวจ"}}}}});
+  }
+  function renderComparison(groups){
+    const target=$("comparison-list");target.replaceChildren();$("comparison-empty").hidden=groups.length>0;
+    groups.forEach(group=>{
+      const solar=solarProduced(group.solar),units=peaUnits(group),cost=peaCost(group),noSolarUnits=solar!==null&&units!==null?units+solar:null,saved=estimate(group),noSolarCost=saved!==null&&cost!==null?cost+saved:null;
+      const section=document.createElement("section"),caption=make("h4",`เดือน ${monthName(group.month,group.year)} · ข้อมูลตามตัวกรอง`,"comparison-caption"),scroll=make("div","","table-scroll"),table=make("table","","comparison");
+      const thead=document.createElement("thead"),head=document.createElement("tr");
+      ["รายการวิเคราะห์หน่วยไฟ","กรณีไม่มีโซลาร์ · ประมาณการ","ปัจจุบัน (มีโซลาร์)"].forEach(text=>head.appendChild(make("th",text)));
+      thead.appendChild(head);
+      const tbody=document.createElement("tbody");
+      function row(label,without,current){const tr=document.createElement("tr");tr.append(make("th",label),make("td",without),make("td",current));tbody.appendChild(tr)}
+      row("ปริมาณการใช้ไฟรวม · Units",noSolarUnits===null?"ยังคำนวณไม่ได้":`${fmt(noSolarUnits)} Units (ประมาณการ)`,units===null?empty:`${fmt(units)} Units`);
+      row("รวมยอดที่ต้องชำระ (บิล PEA) · บาท",noSolarCost===null?"ยังคำนวณไม่ได้":`${money(noSolarCost)} (ประมาณการ)`,cost===null?empty:money(cost));
+      row("ส่วนต่างที่ประหยัดได้ · บาท",saved===null?"ยังคำนวณไม่ได้":`${money(saved)} (ประมาณการ)`,saved===null?"ยังคำนวณไม่ได้":"ไม่ใช่รายการในบิล PEA");
+      table.append(thead,tbody);scroll.appendChild(table);section.append(caption,scroll);target.appendChild(section);
+    });
+  }
+  function renderDashboard(){
+    const rows=energyRows(),inspections=pmRows(),groups=grouped(rows),counts=pmCounts(inspections);
+    const dates=[...rows.map(r=>r.savedAt),...inspections.map(r=>r.inspectionDate)].filter(Boolean).sort();
+    const range=filters.month||filters.year?`${filters.month?months[Number(filters.month)-1]:"ทุกเดือน"} / ${filters.year||"ทุกปี พ.ศ."}`:"ทุกเดือน / ทุกปี พ.ศ.";
+    $("dashboard-range").textContent=`ช่วงข้อมูล: ${range} · PM: ${filters.building||"ทุกอาคาร"} · ${dates.length?`อัปเดตล่าสุด ${new Intl.DateTimeFormat("th-TH-u-ca-buddhist",{dateStyle:"medium",timeStyle:"short"}).format(new Date(dates.at(-1)))}`:"ยังไม่มีข้อมูลในช่วงที่เลือก"}`;
+    const solarRows=rows.filter(r=>r.kind==="solar");
+    const solar10=sumPresent(solarRows.map(r=>r.produced10Kwh)),solar100=sumPresent(solarRows.map(r=>r.produced100Kwh)),totalSolar=sumPresent(solarRows.map(solarProduced));
+    const totalPEA=sumPresent(groups.map(peaUnits)),totalCost=sumPresent(groups.map(peaCost));
+    const reduction=totalSolar!==null&&totalPEA!==null&&totalSolar+totalPEA>0?100*totalSolar/(totalSolar+totalPEA):null;
+    const estimates=groups.map(estimate).filter(v=>v!==null),saving=estimates.length?estimates.reduce((a,b)=>a+b,0):null;
+    kpi("kpi-solar-10",solar10,"kWh");kpi("kpi-solar-100",solar100,"kWh");kpi("kpi-solar",totalSolar,"kWh");
+    kpi("kpi-pea",totalPEA,"Units / kWh");kpi("kpi-cost",totalCost,"บาท");kpi("kpi-reduction",reduction,"%");kpi("kpi-saving",saving,"บาท · ค่าประมาณการ");
+    $("kpi-pm").textContent=inspections.length?`ผ่าน ${fmt(counts.pass)} · ไม่ผ่าน ${fmt(counts.fail)} · รอตรวจ ${fmt(counts.pending)}`:"ยังไม่มีผลตรวจ";
+    $("kpi-pm").classList.toggle("is-empty",!inspections.length);
+    $("saving-detail").textContent=saving===null?"ยังไม่มีข้อมูลเพียงพอสำหรับประมาณการ":money(saving);
+    renderComparison(groups);renderUnits(groups);renderCost(groups);renderPMChart(inspections,counts);
+    const summary=$("energy-summary");summary.replaceChildren();
+    [["ใช้ไฟจาก PEA",totalPEA===null?empty:`${fmt(totalPEA)} Units / kWh`,"border-[#3984bf]"],["ผลิตจากโซลาร์",totalSolar===null?empty:`${fmt(totalSolar)} kWh`,"border-[#18a78c]"],["เปอร์เซ็นต์การลดใช้ไฟ",reduction===null?"ยังคำนวณไม่ได้":`${fmt(reduction)}%`,"border-[#9580bb]"]].forEach(([label,value,border])=>{const card=make("article","",`rounded-2xl border-l-4 ${border} bg-[#f4f9fc] p-5`);card.append(make("p",label,"font-semibold"),make("p",value,"font-extrabold mt-2"));summary.appendChild(card)});
+    $("carbon-empty").textContent="ยังไม่มีข้อมูลเพียงพอสำหรับคำนวณการลดคาร์บอน — ไม่มีค่าปัจจัยการปล่อย (emission factor) ในข้อมูลที่กรอก จึงไม่แสดงกราฟหรือค่า CO₂ สมมติ";
+    const fault=$("fault-content");fault.replaceChildren();
+    if(!inspections.length)fault.appendChild(make("p","ยังไม่มีผลตรวจ PM ตามตัวกรอง","empty"));
+    else{
+      const sum=make("div","","grid sm:grid-cols-3 gap-3 mb-4");
+      [["ผ่าน",counts.pass,"pass"],["ไม่ผ่าน",counts.fail,"fail"],["รอตรวจ",counts.pending,"wait"]].forEach(([label,count,type])=>{const card=make("div","","rounded-xl border border-[#dfebee] p-4 bg-[#f8fcfc]");card.append(make("span",label,`badge ${type}`),make("p",`${fmt(count)} รายการ`,"font-bold mt-2"));sum.appendChild(card)});
+      fault.appendChild(sum);
+      const failures=inspections.flatMap(r=>Object.entries(r.checks).filter(([,s])=>s==="fail").map(([key])=>`${r.building}: ${checkNames[key]}${r.note?` — ${r.note}`:""}`));
+      fault.appendChild(make("p",failures.length?"รายการที่ต้องติดตาม":"ไม่มีรายการไม่ผ่านในผลตรวจที่เลือก","font-bold mb-2"));
+      if(failures.length){const list=make("ul","","list-disc pl-6 space-y-1");failures.forEach(item=>list.appendChild(make("li",item)));fault.appendChild(list)}
+    }
+    $("history-empty").hidden=inspections.length>0;$("history-table").hidden=inspections.length===0;$("history-tbody").replaceChildren();
+    inspections.forEach(r=>{
+      const c=pmCounts([r]),status=c.fail?"ไม่ผ่าน":c.pending?"รอตรวจ":"ผ่าน",tr=document.createElement("tr");
+      const date=new Intl.DateTimeFormat("th-TH-u-ca-buddhist",{dateStyle:"medium",timeStyle:"short"}).format(new Date(r.inspectionDate));
+      [date,r.building,r.technician,String(Object.keys(r.checks).length),String(c.pass),String(c.fail),String(c.pending)].forEach(v=>tr.appendChild(make("td",v)));
+      const cell=document.createElement("td");cell.appendChild(make("span",status,`badge ${c.fail?"fail":c.pending?"wait":"pass"}`));tr.append(cell,make("td",r.note||"—"));$("history-tbody").appendChild(tr);
+    });
+    const executive=$("executive-content");executive.replaceChildren();const insights=[],costGroups=groups.filter(g=>peaCost(g)!==null);
+    if(costGroups.length>=2){const last=costGroups.at(-1),prev=costGroups.at(-2);if(last.year*12+last.month-(prev.year*12+prev.month)===1){const diff=peaCost(last)-peaCost(prev);insights.push(`ค่าไฟ ${monthName(last.month,last.year)} ${diff>0?"เพิ่มขึ้น":diff<0?"ลดลง":"เท่ากับเดือนก่อน"} ${money(Math.abs(diff))}`)}}
+    const solarGroups=groups.filter(g=>solarProduced(g.solar)!==null);
+    if(solarGroups.length>=2){const last=solarGroups.at(-1),prev=solarGroups.at(-2);if(last.year*12+last.month-(prev.year*12+prev.month)===1){const diff=solarProduced(last.solar)-solarProduced(prev.solar);insights.push(`โซลาร์ ${monthName(last.month,last.year)} ผลิต${diff>0?"เพิ่ม":diff<0?"ลด":"เท่าเดิม"} ${fmt(Math.abs(diff))} kWh เทียบเดือนก่อน`)}}
+    if(counts.fail)insights.push(`มี ${fmt(counts.fail)} รายการตรวจ PM ไม่ผ่านที่ต้องติดตาม`);
+    const ranked=groups.map(group=>({group,value:estimate(group)})).filter(item=>item.value!==null).sort((a,b)=>b.value-a.value);
+    if(ranked.length)insights.push(`เดือนที่มีประมาณการเงินประหยัดสูงที่สุดในช่วงที่เลือก: ${monthName(ranked[0].group.month,ranked[0].group.year)} (${money(ranked[0].value)}; ไม่ใช่ยอดประหยัดที่ตรวจวัดจริง)`);
+    if(!insights.length)insights.push("ข้อมูลยังไม่พอสำหรับสรุปแนวโน้ม: กรอกข้อมูลพลังงานอย่างน้อยสองเดือนต่อเนื่อง พร้อมค่าไฟและหน่วยการใช้ และบันทึกผลตรวจ PM");
+    insights.forEach(text=>executive.appendChild(make("p",text,"rounded-xl bg-[#fdf8e6] border border-[#ead9a0] p-4")));
+  }
+  updateCleaningNote();showView("dashboard");if(window.lucide)lucide.createIcons();
+  loadAll();
+})();
+</script>
+</body>
+</html>
