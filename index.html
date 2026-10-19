@@ -153,6 +153,11 @@
     .yoy{background:linear-gradient(135deg,#9a3412,#f59e0b)}
     .cumcost{background:linear-gradient(135deg,#0f3d6e,#0ea5e9)}
     .cumsave{background:linear-gradient(135deg,#14532d,#22c55e)}
+    .total{background:linear-gradient(135deg,#312e81,#6366f1)}
+    .target{background:linear-gradient(135deg,#9d174d,#ec4899)}
+    .pbar{height:12px;border-radius:999px;background:#ffffff40;margin-top:12px;overflow:hidden}
+    .pbar>i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#fde68a,#ffffff);transition:width .4s}
+    tr.sel-row td{background:#fff3c4;font-weight:700}
     .wash-in{background:linear-gradient(135deg,#1e3a8a,#3b82f6)}
     .wash-dental{background:linear-gradient(135deg,#065f46,#10b981)}
     .wash-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
@@ -242,6 +247,23 @@ KSK Solar &amp; Power Monitoring System</h1>
           <article class="kpi reduction"><div class="flex items-start gap-2"><i data-lucide="trending-down" aria-hidden="true"></i><p class="kpi-label">เปอร์เซ็นต์การลดใช้ไฟ</p></div><p id="kpi-reduction" class="kpi-number"></p><p id="kpi-reduction-unit" class="kpi-unit"></p><p class="kpi-help">โซลาร์ ÷ (โซลาร์ + ไฟ PEA) × 100</p></article>
           <article class="kpi saving"><div class="flex items-start gap-2"><i data-lucide="coins" aria-hidden="true"></i><p class="kpi-label">ประมาณการเงินที่ประหยัดได้</p></div><p id="kpi-saving" class="kpi-number"></p><p id="kpi-saving-unit" class="kpi-unit"></p><p class="kpi-help">ค่าประมาณการ ไม่ใช่ยอดประหยัดที่ตรวจวัดจริง</p></article>
         </div>
+        <div class="wash-grid mt-4">
+          <article class="kpi total"><div class="flex items-start gap-2"><i data-lucide="plug-zap" aria-hidden="true"></i><p class="kpi-label">รวมการใช้ไฟฟ้าทั้งหมด (PEA + โซลาร์)</p></div><p id="kpi-total" class="kpi-number" aria-live="polite"></p><p id="kpi-total-unit" class="kpi-unit"></p><p id="kpi-total-help" class="kpi-help"></p></article>
+          <article class="kpi target"><div class="flex items-start gap-2"><i data-lucide="target" aria-hidden="true"></i><p id="target-label" class="kpi-label">เป้าหมายประหยัดพลังงาน</p></div><p id="kpi-target" class="kpi-number" aria-live="polite"></p><p id="kpi-target-unit" class="kpi-unit"></p><div class="pbar" aria-hidden="true"><i id="target-bar" style="width:0"></i></div><p id="kpi-target-help" class="kpi-help"></p></article>
+        </div>
+        <section class="glass-card mt-4" aria-labelledby="target-title">
+          <div class="stripe"></div>
+          <div class="card-head"><h4 id="target-title" class="ch">ผลเทียบเป้าหมายประหยัดพลังงานรายปี / รายไตรมาส</h4></div>
+          <div class="dash-body">
+            <div class="table-scroll">
+              <table class="data-table">
+                <thead><tr><th>ช่วงเวลา</th><th>ใช้ไฟปีก่อน (<span class="ty0"></span>)</th><th>ใช้ไฟปีนี้ (<span class="ty1"></span>)</th><th>ประหยัดได้</th><th>เป้าหมายใช้ไฟไม่เกิน</th><th>ผล</th></tr></thead>
+                <tbody id="target-tbody"></tbody>
+              </table>
+            </div>
+            <p id="target-note" class="mt-3 text-sm" style="color:#425b6a"></p>
+          </div>
+        </section>
         <div class="kpi-grid mt-4">
           <article class="kpi yoy"><div class="flex items-start gap-2"><i data-lucide="git-compare" aria-hidden="true"></i><p class="kpi-label">เทียบช่วงเดียวกันของปีที่แล้ว</p></div><p id="kpi-yoy" class="kpi-number" aria-live="polite"></p><p id="kpi-yoy-unit" class="kpi-unit"></p><p id="kpi-yoy-help" class="kpi-help"></p></article>
           <article class="kpi cumcost"><div class="flex items-start gap-2"><i data-lucide="wallet" aria-hidden="true"></i><p class="kpi-label">ยอดค่าไฟ PEA สะสมทั้งปี</p></div><p id="kpi-cumcost" class="kpi-number" aria-live="polite"></p><p id="kpi-cumcost-unit" class="kpi-unit"></p><p id="kpi-cumcost-help" class="kpi-help"></p></article>
@@ -831,6 +853,48 @@ KSK Solar &amp; Power Monitoring System</h1>
     saves.length?setCard("kpi-cumsave",fmt(saves.reduce((a,b)=>a+b,0)),`บาท · ปี พ.ศ. ${Y}`,`รวม ${saves.length} เดือนที่คำนวณได้ จากโซลาร์ที่ผลิต × อัตราค่าไฟเฉลี่ยต่อหน่วยของเดือนนั้น`):setCard("kpi-cumsave","ยังคำนวณไม่ได้",`ปี พ.ศ. ${Y}`,"ต้องมีข้อมูลโซลาร์ หน่วยไฟ และค่าไฟของเดือนเดียวกัน");
   }
 
+  /* ---------- เป้าหมายประหยัดพลังงาน ---------- */
+  const ENERGY_TARGET_PCT=5; // เป้าหมายลดการใช้ไฟลง 5% เทียบช่วงเดียวกันของปีที่แล้ว
+  function usageCompare(Y,list){
+    const cur=groupsFor(Y,list),prev=groupsFor(Y-1,list),pairs=cur.map(c=>({c,p:prev.find(x=>x.month===c.month)})).filter(x=>x.p);
+    for(const basis of ["total","pea"]){
+      const ok=pairs.filter(({c,p})=>peaUnits(c)!==null&&peaUnits(p)!==null&&(basis==="pea"||(solarProduced(c.solar)!==null&&solarProduced(p.solar)!==null)));
+      if(!ok.length)continue;
+      const val=g=>basis==="total"?peaUnits(g)+solarProduced(g.solar):peaUnits(g);
+      const cu=ok.reduce((s,x)=>s+val(x.c),0),pu=ok.reduce((s,x)=>s+val(x.p),0);
+      return {basis,n:ok.length,cur:cu,prev:pu,pct:pu>0?(pu-cu)/pu*100:null,limit:pu*(1-ENERGY_TARGET_PCT/100)};
+    }
+    return null;
+  }
+  function renderTarget(totalPEA,totalSolar){
+    const T=ENERGY_TARGET_PCT,tot=sumPresent([totalPEA,totalSolar]);
+    $("kpi-total").textContent=tot===null?empty:fmt(tot);$("kpi-total").classList.toggle("is-empty",tot===null);
+    $("kpi-total-unit").textContent=tot===null?"":"Units / kWh";
+    $("kpi-total-help").textContent=`ไฟ PEA ${totalPEA===null?"ยังไม่มีข้อมูล":fmt(totalPEA)} + โซลาร์ ${totalSolar===null?"ยังไม่มีข้อมูล":fmt(totalSolar)}${totalPEA===null||totalSolar===null?" · ยอดรวมนี้ยังไม่ครบทั้งสองแหล่ง":""}`;
+    $("target-label").textContent=`เป้าหมายประหยัดพลังงาน ${T}% · ${periodLabel()}`;
+    const Y=refYear();
+    document.querySelectorAll(".ty0").forEach(e=>e.textContent=Y===null?"-":Y-1);document.querySelectorAll(".ty1").forEach(e=>e.textContent=Y===null?"-":Y);
+    const tb=$("target-tbody");tb.replaceChildren();
+    if(Y===null){setCard("kpi-target","ยังไม่มีข้อมูล","","");$("target-bar").style.width="0";$("target-note").textContent="";return}
+    const rows=[["ทั้งปี",null,!filters.month&&!filters.quarter],...[1,2,3,4].map(q=>[`ไตรมาส ${q} (${mShort[q*3-3]} – ${mShort[q*3-1]})`,[q*3-2,q*3-1,q*3],filters.quarter===String(q)])];
+    rows.forEach(([name,list,sel])=>{
+      const r=usageCompare(Y,list),tr=document.createElement("tr");if(sel)tr.className="sel-row";
+      if(!r||r.pct===null){tr.append(make("td",name),...Array.from({length:4},()=>make("td","—")));const c=document.createElement("td");c.appendChild(make("span","ยังไม่มีข้อมูล","badge wait"));tr.appendChild(c)}
+      else{
+        const ok=r.pct>=T,suffix=r.basis==="pea"?" (เฉพาะ PEA)":"",c=document.createElement("td");c.appendChild(make("span",ok?"ผ่านเป้า":"ยังไม่ถึงเป้า",`badge ${ok?"pass":"fail"}`));
+        tr.append(make("td",name),make("td",fmt(r.prev)+suffix),make("td",fmt(r.cur)+suffix),make("td",`${r.pct>=0?"▼ ":"▲ "}${fmt(Math.abs(r.pct))}%`),make("td",fmt(r.limit)),c);
+      }
+      tb.appendChild(tr);
+    });
+    $("target-note").textContent=`เป้าหมาย: ลดการใช้ไฟลง ${T}% เทียบช่วงเดียวกันของปีที่แล้ว · เทียบการใช้ไฟรวม (PEA + โซลาร์) ของเดือนที่มีข้อมูลครบทั้งสองปี หากไม่มีข้อมูลโซลาร์ครบจะเทียบเฉพาะไฟ PEA`;
+    const r=usageCompare(Y,periodMonths());
+    if(!r||r.pct===null){setCard("kpi-target","ยังเปรียบเทียบไม่ได้",`ช่วง ${periodLabel()} ปี พ.ศ. ${Y}`,`ต้องมีข้อมูลหน่วยไฟของเดือนเดียวกันทั้งปี ${Y} และ ${Y-1}`);$("target-bar").style.width="0";return}
+    const ok=r.pct>=T,need=Math.max(0,r.cur-r.limit);
+    setCard("kpi-target",`${r.pct>=0?"▼":"▲"} ${fmt(Math.abs(r.pct))}%`,`${r.pct>=0?"ใช้ไฟลดลง":"ใช้ไฟเพิ่มขึ้น"} เทียบปี ${Y-1} · เป้าหมาย ${T}%`,
+      `${ok?"✅ ผ่านเป้าหมาย":"❌ ยังไม่ถึงเป้าหมาย"} · ใช้ ${fmt(r.cur)} เทียบ ${fmt(r.prev)} Units (เป้าหมายไม่เกิน ${fmt(r.limit)})${ok?"":` · ต้องลดอีก ${fmt(need)} Units`} · ${r.basis==="pea"?"เฉพาะไฟ PEA":"รวม PEA + โซลาร์"} · ${r.n} เดือน`);
+    $("target-bar").style.width=`${Math.max(0,Math.min(100,r.pct/T*100))}%`;
+  }
+
   /* ---------- การล้างแผง ---------- */
   const WASH_DAYS=365,WASH_WARN=30;
   const washBuildings=[["อาคารผู้ป่วยใน","100 kW","🏥","wash-in"],["อาคารทันตกรรม","10 kW","🦷","wash-dental"]];
@@ -896,7 +960,7 @@ KSK Solar &amp; Power Monitoring System</h1>
     $("kpi-pm").textContent=inspections.length?`ผ่าน ${fmt(counts.pass)} · ไม่ผ่าน ${fmt(counts.fail)} · รอตรวจ ${fmt(counts.pending)}`:"ยังไม่มีผลตรวจ";
     $("kpi-pm").classList.toggle("is-empty",!inspections.length);
     $("saving-detail").textContent=saving===null?"ยังไม่มีข้อมูลเพียงพอสำหรับประมาณการ":money(saving);
-    renderComparison(groups);renderUnits(groups);renderCost(groups);renderPMChart(inspections,counts);renderYearStats();renderWash();
+    renderComparison(groups);renderUnits(groups);renderCost(groups);renderPMChart(inspections,counts);renderYearStats();renderTarget(totalPEA,totalSolar);renderWash();
     $("history-count").textContent=`(${fmt(inspections.length)} รายการ)`;
     const summary=$("energy-summary");summary.replaceChildren();
     [["ใช้ไฟจาก PEA",totalPEA===null?empty:`${fmt(totalPEA)} Units / kWh`,"border-[#3984bf]"],["ผลิตจากโซลาร์",totalSolar===null?empty:`${fmt(totalSolar)} kWh`,"border-[#18a78c]"],["เปอร์เซ็นต์การลดใช้ไฟ",reduction===null?"ยังคำนวณไม่ได้":`${fmt(reduction)}%`,"border-[#9580bb]"]].forEach(([label,value,border])=>{const card=make("article","",`rounded-2xl border-l-4 ${border} bg-[#f4f9fc] p-5`);card.append(make("p",label,"font-semibold"),make("p",value,"font-extrabold mt-2"));summary.appendChild(card)});
