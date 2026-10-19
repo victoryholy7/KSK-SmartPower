@@ -50,14 +50,15 @@
     [data-g="trend"]{--c1:#7e22ce;--c2:#d946a8;--t2:#f5e6fb;--bd:#d9b2ec}
     [data-g="inspect"]{--c1:#0e7490;--c2:#14b8a6;--t2:#d9f5f2;--bd:#8fd5d0}
     [data-g="exec"]{--c1:#1e3a5f;--c2:#d4a017;--t2:#fdf1d0;--bd:#e5cb7e}
+    [data-g="wash"]{--c1:#0369a1;--c2:#22d3ee;--t2:#dcf6fd;--bd:#9bd8ea}
     [data-g="pmhead"]{--c1:#1e3a5f;--c2:#0e9aa7;--t2:#dff1f6;--bd:#9cc9d6}
     /* ฟอร์มตรวจเช็ก PM: 4 หัวข้อ 4 สี */
     [data-g="pm1"]{--c1:#1d4ed8;--c2:#38a3f0;--t2:#e0eeff;--bd:#a3c5ee}
     [data-g="pm2"]{--c1:#047857;--c2:#5fc46a;--t2:#e1f7e8;--bd:#9fd9b6}
     [data-g="pm3"]{--c1:#c2410c;--c2:#f5a623;--t2:#fff0d9;--bd:#efc487}
     [data-g="pm4"]{--c1:#7e22ce;--c2:#d946a8;--t2:#f5e6fb;--bd:#d9b2ec}
-    #pm-form .card-head{background:linear-gradient(100deg,var(--c1),var(--c2));border-left:0;border-bottom:0}
-    #pm-form .ch{color:#fff}
+    #pm-form .card-head,#wash-card .card-head{background:linear-gradient(100deg,var(--c1),var(--c2));border-left:0;border-bottom:0}
+    #pm-form .ch,#wash-card .ch{color:#fff}
 
     /* หัวข้อกลุ่มบน Dashboard */
     .dash-group{margin-top:34px}
@@ -149,6 +150,18 @@
     .group-card{padding:19px;border:1.5px solid;border-radius:18px}
     .hospital-card{background:linear-gradient(135deg,#fafdff,#dfefff);border-color:#9bc9e9}
     .residence-card{background:linear-gradient(135deg,#fff,#ece6ff);border-color:#b9aeea}
+    .yoy{background:linear-gradient(135deg,#9a3412,#f59e0b)}
+    .cumcost{background:linear-gradient(135deg,#0f3d6e,#0ea5e9)}
+    .cumsave{background:linear-gradient(135deg,#14532d,#22c55e)}
+    .wash-in{background:linear-gradient(135deg,#1e3a8a,#3b82f6)}
+    .wash-dental{background:linear-gradient(135deg,#065f46,#10b981)}
+    .wash-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+    .tall{max-height:520px;overflow:auto}
+    .tall .data-table th{position:sticky;top:0;z-index:1}
+    .head-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .toggle-btn{padding:8px 16px;border-radius:12px;border:1.5px solid var(--c1);background:linear-gradient(180deg,#fff,var(--t2));color:var(--c1);font-weight:800;box-shadow:0 3px 0 var(--bd)}
+    .toggle-btn:active{transform:translateY(2px);box-shadow:none}
+    @media(max-width:600px){.wash-grid{grid-template-columns:1fr}}
     [hidden]{display:none!important}
     @media(max-width:850px){.kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
     @media(max-width:600px){.app-shell{padding-top:10px}.site-header{margin:0 10px;border-radius:18px}.nav-region{margin:12px 10px 0}.nav-tab{min-height:71px;flex-direction:column;gap:3px;font-size:12px;padding:6px 2px}.nav-tab svg{width:19px;height:19px}.dash-body{padding:16px}.kpi-grid{grid-template-columns:1fr}.kpi{min-height:155px}.kpi-number{font-size:clamp(28px,8vw,40px)}.group-heading{font-size:19px}}
@@ -192,16 +205,18 @@ KSK Solar &amp; Power Monitoring System</h1>
       <section class="glass-card mb-5" data-g="filter" aria-labelledby="filter-title">
         <div class="stripe"></div>
         <div class="card-head"><h3 id="filter-title" class="ch">เลือกช่วงข้อมูลและพื้นที่ตรวจ PM</h3></div>
-        <form id="filter-form" class="dash-body grid sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+        <form id="filter-form" class="dash-body grid sm:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
+          <div><label for="filter-year" class="form-label">ปี พ.ศ.</label><select id="filter-year" class="field"><option value="">ทุกปี</option></select></div>
+          <div><label for="filter-quarter" class="form-label">ช่วงเวลา (ทั้งปี / รายไตรมาส)</label>
+            <select id="filter-quarter" class="field"><option value="">ทั้งปี</option><option value="1">ไตรมาส 1 (ม.ค. – มี.ค.)</option><option value="2">ไตรมาส 2 (เม.ย. – มิ.ย.)</option><option value="3">ไตรมาส 3 (ก.ค. – ก.ย.)</option><option value="4">ไตรมาส 4 (ต.ค. – ธ.ค.)</option></select></div>
           <div><label for="filter-month" class="form-label">เดือน</label><select id="filter-month" class="field month-filter"></select></div>
-          <div><label for="filter-year" class="form-label">ปี พ.ศ. (เว้นว่างเพื่อดูทุกปี)</label><input id="filter-year" class="field" type="number" min="1000" max="9999" step="1" inputmode="numeric"></div>
           <div><label for="filter-building" class="form-label">อาคาร / พื้นที่ — เฉพาะผล PM</label>
             <select id="filter-building" class="field"><option value="">ทุกอาคาร</option><option value="อาคารผู้ป่วยใน">🏥 อาคารผู้ป่วยใน</option><option value="อาคารทันตกรรม">🦷 อาคารทันตกรรม</option></select></div>
           <div class="flex gap-2 flex-wrap">
             <button type="submit" class="primary-button px-4 min-h-12">ใช้ตัวกรอง</button>
             <button type="button" id="clear-filter" class="secondary-button px-4 min-h-12">ล้างตัวกรอง</button>
           </div>
-          <p id="filter-error" role="status" class="text-[#a42e30] sm:col-span-2 lg:col-span-4"></p>
+          <p id="filter-error" role="status" class="text-[#a42e30] sm:col-span-2 lg:col-span-3"></p>
         </form>
       </section>
 
@@ -227,6 +242,11 @@ KSK Solar &amp; Power Monitoring System</h1>
           <article class="kpi reduction"><div class="flex items-start gap-2"><i data-lucide="trending-down" aria-hidden="true"></i><p class="kpi-label">เปอร์เซ็นต์การลดใช้ไฟ</p></div><p id="kpi-reduction" class="kpi-number"></p><p id="kpi-reduction-unit" class="kpi-unit"></p><p class="kpi-help">โซลาร์ ÷ (โซลาร์ + ไฟ PEA) × 100</p></article>
           <article class="kpi saving"><div class="flex items-start gap-2"><i data-lucide="coins" aria-hidden="true"></i><p class="kpi-label">ประมาณการเงินที่ประหยัดได้</p></div><p id="kpi-saving" class="kpi-number"></p><p id="kpi-saving-unit" class="kpi-unit"></p><p class="kpi-help">ค่าประมาณการ ไม่ใช่ยอดประหยัดที่ตรวจวัดจริง</p></article>
         </div>
+        <div class="kpi-grid mt-4">
+          <article class="kpi yoy"><div class="flex items-start gap-2"><i data-lucide="git-compare" aria-hidden="true"></i><p class="kpi-label">เทียบช่วงเดียวกันของปีที่แล้ว</p></div><p id="kpi-yoy" class="kpi-number" aria-live="polite"></p><p id="kpi-yoy-unit" class="kpi-unit"></p><p id="kpi-yoy-help" class="kpi-help"></p></article>
+          <article class="kpi cumcost"><div class="flex items-start gap-2"><i data-lucide="wallet" aria-hidden="true"></i><p class="kpi-label">ยอดค่าไฟ PEA สะสมทั้งปี</p></div><p id="kpi-cumcost" class="kpi-number" aria-live="polite"></p><p id="kpi-cumcost-unit" class="kpi-unit"></p><p id="kpi-cumcost-help" class="kpi-help"></p></article>
+          <article class="kpi cumsave"><div class="flex items-start gap-2"><i data-lucide="piggy-bank" aria-hidden="true"></i><p class="kpi-label">ยอดเงินประหยัดสะสมทั้งปี</p></div><p id="kpi-cumsave" class="kpi-number" aria-live="polite"></p><p id="kpi-cumsave-unit" class="kpi-unit"></p><p id="kpi-cumsave-help" class="kpi-help"></p></article>
+        </div>
         <section class="glass-card mt-4" aria-labelledby="saving-title">
           <div class="stripe"></div>
           <div class="dash-body bg-gradient-to-r from-[#edf8f5] to-[#f1f1ff]">
@@ -246,7 +266,7 @@ KSK Solar &amp; Power Monitoring System</h1>
         <div class="glass-card">
           <div class="stripe"></div>
           <div class="dash-body">
-            <p class="mb-4" style="color:#425b6a">เปรียบเทียบรายเดือน/ปี พ.ศ. ตามตัวกรอง · กรณีไม่มีโซลาร์เป็นค่าประมาณจากข้อมูลการผลิต หน่วยไฟ และอัตราเฉลี่ยของบิล PEA เดือนเดียวกัน ไม่ใช่บิลจริง</p>
+            <p class="mb-4" style="color:#425b6a">เปรียบเทียบรายเดือน/ปี พ.ศ. ตามตัวกรอง · กรณีไม่มีโซลาร์คำนวณจากข้อมูลการผลิต หน่วยไฟ และอัตราเฉลี่ยของบิล PEA เดือนเดียวกัน ไม่ใช่บิลจริง</p>
             <p id="comparison-empty" class="empty" hidden>ยังไม่มีข้อมูลพลังงานในช่วงที่เลือกสำหรับแสดงตารางเปรียบเทียบ</p>
             <div id="comparison-list" class="space-y-6" aria-live="polite"></div>
           </div>
@@ -313,13 +333,13 @@ KSK Solar &amp; Power Monitoring System</h1>
           </section>
           <section class="glass-card" aria-labelledby="history-title">
             <div class="stripe"></div>
-            <div class="card-head"><h4 id="history-title" class="ch">ตารางประวัติการตรวจเช็กระบบ</h4></div>
-            <div class="dash-body">
+            <div class="card-head head-row"><h4 id="history-title" class="ch">ตารางประวัติการตรวจเช็กระบบ <span id="history-count" class="text-sm font-semibold" style="color:#52707f"></span></h4><button type="button" id="history-toggle" class="toggle-btn" aria-expanded="true" aria-controls="history-body">ซ่อนตาราง ▲</button></div>
+            <div id="history-body" class="dash-body">
               <div id="history-empty" class="empty">
                 <p class="mb-3" style="color:#425b6a">ยังไม่มีประวัติการตรวจเช็กระบบตามตัวกรอง</p>
                 <button type="button" data-go="inspection" class="secondary-button px-4 min-h-12">ไปหน้าตรวจเช็กระบบ</button>
               </div>
-              <div class="table-scroll">
+              <div class="table-scroll tall">
                 <table id="history-table" class="data-table" hidden>
                   <thead><tr><th>วันที่ตรวจ</th><th>อาคาร</th><th>ผู้ตรวจ</th><th>รายการ</th><th>ผ่าน</th><th>ไม่ผ่าน</th><th>รอตรวจ</th><th>สถานะรวม</th><th>หมายเหตุ</th></tr></thead>
                   <tbody id="history-tbody"></tbody>
@@ -330,11 +350,23 @@ KSK Solar &amp; Power Monitoring System</h1>
         </div>
       </section>
 
-      <section class="dash-group" data-g="exec" aria-labelledby="executive-title">
-        <h3 id="executive-title" class="group-heading">ประเด็นสำคัญสำหรับผู้บริหาร</h3>
-        <div class="glass-card">
-          <div class="stripe"></div>
-          <div id="executive-content" class="dash-body space-y-3" aria-live="polite"></div>
+      <section class="dash-group" data-g="wash" aria-labelledby="wash-group-title">
+        <h3 id="wash-group-title" class="group-heading">การล้างแผงโซลาร์เซลล์ (ปีละ 1 ครั้ง)</h3>
+        <div class="grid gap-5">
+          <div id="wash-cards" class="wash-grid" aria-live="polite"></div>
+          <section class="glass-card" aria-labelledby="wash-history-title">
+            <div class="stripe"></div>
+            <div class="card-head head-row"><h4 id="wash-history-title" class="ch">ประวัติการล้างแผง</h4><button type="button" data-go="inspection" class="toggle-btn">+ บันทึกการล้างแผง</button></div>
+            <div class="dash-body">
+              <p id="wash-empty" class="empty">ยังไม่มีบันทึกการล้างแผง กดปุ่ม "+ บันทึกการล้างแผง" เพื่อเพิ่มรายการ</p>
+              <div class="table-scroll tall">
+                <table id="wash-table" class="data-table" hidden>
+                  <thead><tr><th>วันที่ล้าง</th><th>อาคาร</th><th>ผู้ดำเนินการ</th><th>หมายเหตุ</th></tr></thead>
+                  <tbody id="wash-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
         </div>
       </section>
     </section>
@@ -417,6 +449,23 @@ KSK Solar &amp; Power Monitoring System</h1>
         <button type="submit" class="primary-button w-full min-h-[62px] px-5" style="font-size:19px">บันทึกผลตรวจ PM</button>
         <div id="pm-notice" role="status" aria-live="polite" class="notice hidden"></div>
       </form>
+
+      <section id="wash-card" class="glass-card mt-6" data-g="wash" aria-labelledby="wash-title">
+        <div class="stripe"></div>
+        <div class="card-head"><h3 id="wash-title" class="ch">บันทึกการล้างแผงโซลาร์เซลล์</h3></div>
+        <form id="wash-form" novalidate class="p-5 space-y-4">
+          <p style="color:#425b6a">บันทึกเมื่อล้างแผงเสร็จแล้ว ระบบจะนับรอบ 1 ปี และแจ้งเตือนใน Telegram เมื่อใกล้ครบกำหนด</p>
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div><label for="wash-building" class="form-label">อาคาร *</label>
+              <select id="wash-building" class="field"><option value="">— เลือกอาคาร —</option><option value="อาคารผู้ป่วยใน">🏥 อาคารผู้ป่วยใน 100 kW</option><option value="อาคารทันตกรรม">🦷 อาคารทันตกรรม 10 kW</option></select></div>
+            <div><label for="wash-date" class="form-label">วันที่ล้างแผง *</label><input id="wash-date" class="field" type="date"></div>
+            <div><label for="wash-by" class="form-label">ผู้ดำเนินการล้าง *</label><input id="wash-by" class="field" maxlength="100" placeholder="ชื่อผู้ล้าง หรือชื่อบริษัทผู้รับจ้าง"></div>
+            <div><label for="wash-note" class="form-label">หมายเหตุ</label><input id="wash-note" class="field" maxlength="300" placeholder="เช่น วิธีล้าง สภาพแผงหลังล้าง"></div>
+          </div>
+          <button type="submit" class="primary-button w-full sm:w-auto min-h-12 px-6">บันทึกการล้างแผง</button>
+          <div id="wash-notice" role="status" aria-live="polite" class="notice hidden"></div>
+        </form>
+      </section>
     </section>
 
     <!-- ================= ENERGY ================= -->
@@ -517,7 +566,7 @@ KSK Solar &amp; Power Monitoring System</h1>
 
   const $=id=>document.getElementById(id);
   const months=["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
-  const state={energyRecords:[],inspections:[]};
+  const state={energyRecords:[],inspections:[],washRecords:[]};
   const pending={solar:null,hospital:null,residence:null};
   const charts={units:null,cost:null,pm:null};
   const fields={
@@ -531,7 +580,7 @@ KSK Solar &amp; Power Monitoring System</h1>
   const money=n=>`${fmt(n)} บาท`;
   const empty="ยังไม่มีข้อมูล";
   const currentYear=new Date().getFullYear()+543;
-  let filters={month:"",year:"",building:""};
+  let filters={month:"",year:"",quarter:"",building:""};
 
   /* ---------- เชื่อมต่อ Google Apps Script ---------- */
   const apiReady=()=>/^https:\/\/script\.google\.com\//.test(API_URL);
@@ -552,7 +601,7 @@ KSK Solar &amp; Power Monitoring System</h1>
       const res=await fetch(API_URL+"?action=getAll");
       const data=await res.json();
       if(!data.ok)throw new Error(data.error||"เกิดข้อผิดพลาด");
-      state.energyRecords=data.energyRecords||[];state.inspections=data.inspections||[];
+      state.energyRecords=data.energyRecords||[];state.inspections=data.inspections||[];state.washRecords=data.washRecords||[];
       status.textContent="✅ เชื่อมต่อ Google Sheet แล้ว";renderDashboard();
     }catch(e){status.textContent="❌ โหลดข้อมูลไม่สำเร็จ: "+e.message}
   }
@@ -659,21 +708,30 @@ KSK Solar &amp; Power Monitoring System</h1>
   });
   function refreshTime(){$("current-time").textContent=`วันเวลาปัจจุบัน: ${new Intl.DateTimeFormat("th-TH-u-ca-buddhist",{timeZone:"Asia/Bangkok",dateStyle:"full",timeStyle:"short"}).format(new Date())}`}
   refreshTime();setInterval(refreshTime,60000);
-  $("filter-form").addEventListener("submit",event=>{
-    event.preventDefault();const year=$("filter-year").value.trim();
-    if(year&&(!/^[0-9]{4}$/.test(year)||Number(year)<1000)){$("filter-error").textContent="กรุณากรอกปี พ.ศ. 4 หลัก";$("filter-year").focus();return}
-    $("filter-error").textContent="";filters={month:$("filter-month").value,year,building:$("filter-building").value};renderDashboard();
-  });
-  $("clear-filter").addEventListener("click",()=>{$("filter-form").reset();$("filter-error").textContent="";filters={month:"",year:"",building:""};renderDashboard()});
+  function applyFilters(){filters={month:$("filter-month").value,year:$("filter-year").value,quarter:$("filter-quarter").value,building:$("filter-building").value};$("filter-error").textContent="";renderDashboard()}
+  $("filter-form").addEventListener("submit",event=>{event.preventDefault();applyFilters()});
+  $("filter-month").addEventListener("change",()=>{if($("filter-month").value)$("filter-quarter").value="";applyFilters()});
+  $("filter-quarter").addEventListener("change",()=>{if($("filter-quarter").value)$("filter-month").value="";applyFilters()});
+  ["filter-year","filter-building"].forEach(id=>$(id).addEventListener("change",applyFilters));
+  $("clear-filter").addEventListener("click",()=>{$("filter-form").reset();applyFilters()});
   $("filter-form").addEventListener("reset",()=>setTimeout(()=>$("filter-building").dispatchEvent(new Event("change")),0));
+  function populateYears(){
+    const sel=$("filter-year"),cur=sel.value,ys=new Set([currentYear-2,currentYear-1,currentYear]);
+    state.energyRecords.forEach(r=>ys.add(Number(r.year)));
+    state.inspections.forEach(r=>{const d=new Date(r.inspectionDate);if(!isNaN(d))ys.add(d.getFullYear()+543)});
+    const list=[...ys].filter(Number.isFinite).sort((a,b)=>b-a),sig=list.join(",");
+    if(sel.dataset.sig===sig)return;sel.dataset.sig=sig;
+    sel.replaceChildren(new Option("ทุกปี",""));list.forEach(y=>sel.add(new Option(String(y),String(y))));sel.value=list.includes(Number(cur))?cur:"";
+  }
 
   /* ---------- สีตามอาคาร ---------- */
   const toneOf=v=>v==="อาคารผู้ป่วยใน"?"in":v==="อาคารทันตกรรม"?"dental":"";
-  ["inspection-building","filter-building"].forEach(id=>{const el=$(id),apply=()=>{el.dataset.tone=toneOf(el.value)};el.addEventListener("change",apply);apply()});
+  ["inspection-building","filter-building","wash-building"].forEach(id=>{const el=$(id),apply=()=>{el.dataset.tone=toneOf(el.value)};el.addEventListener("change",apply);apply()});
 
   function make(tag,text,className=""){const el=document.createElement(tag);el.textContent=text;el.className=className;return el}
-  function energyRows(){return state.energyRecords.filter(row=>(!filters.month||String(row.month)===filters.month)&&(!filters.year||String(row.year)===filters.year))}
-  function pmRows(){return state.inspections.filter(row=>{const date=new Date(row.inspectionDate);return(!filters.month||String(date.getMonth()+1)===filters.month)&&(!filters.year||String(date.getFullYear()+543)===filters.year)&&(!filters.building||row.building===filters.building)})}
+  const inQuarter=m=>!filters.quarter||Math.ceil(Number(m)/3)===Number(filters.quarter);
+  function energyRows(){return state.energyRecords.filter(row=>(!filters.month||String(row.month)===filters.month)&&inQuarter(row.month)&&(!filters.year||String(row.year)===filters.year))}
+  function pmRows(){return state.inspections.filter(row=>{const date=new Date(row.inspectionDate);return(!filters.month||String(date.getMonth()+1)===filters.month)&&inQuarter(date.getMonth()+1)&&(!filters.year||String(date.getFullYear()+543)===filters.year)&&(!filters.building||row.building===filters.building)})}
   function pmCounts(rows){const result={pass:0,fail:0,pending:0};rows.forEach(row=>Object.values(row.checks).forEach(value=>{if(value in result)result[value]++}));return result}
   function monthName(month,year){return `${months[month-1]} ${year}`}
   function grouped(rows){const map=new Map();rows.forEach(row=>{const key=`${row.year}-${String(row.month).padStart(2,"0")}`;if(!map.has(key))map.set(key,{key,year:row.year,month:row.month});map.get(key)[row.kind]=row});return [...map.values()].sort((a,b)=>a.key.localeCompare(b.key))}
@@ -682,31 +740,53 @@ KSK Solar &amp; Power Monitoring System</h1>
   function peaUnits(group){return sumPresent([group.hospital?.units,group.residence?.units])}
   function peaCost(group){return sumPresent([group.hospital?.costBaht,group.residence?.costBaht])}
   function estimate(group){const solar=solarProduced(group.solar),units=peaUnits(group),cost=peaCost(group);return solar!==null&&units!==null&&units>0&&cost!==null?solar*(cost/units):null}
-  function kpi(id,value,unit){const el=$(id),available=value!==null&&value!==undefined;el.textContent=available?fmt(value):id.includes("saving")||id.includes("reduction")?"ยังคำนวณไม่ได้":empty;el.classList.toggle("is-empty",!available);$(`${id}-unit`).textContent=available?unit:""}
+  function kpi(id,value,unit){const el=$(id),available=value!==null&&value!==undefined;el.textContent=available?fmt(value):id.includes("saving")||id.includes("reduction")||id.includes("cumsave")?"ยังคำนวณไม่ได้":empty;el.classList.toggle("is-empty",!available);$(`${id}-unit`).textContent=available?unit:""}
   function destroyChart(key){if(charts[key]){charts[key].destroy();charts[key]=null}}
   function chartDefaults(){Chart.defaults.font.family="Prompt";Chart.defaults.color="#36546c";Chart.defaults.plugins.legend.labels.font={family:"Prompt",size:12,weight:"600"}}
   function chartArea(key,hasData){$(`${key}-empty`).hidden=hasData;$(key==="pm-chart"?"pm-chart-scroll":`${key}-scroll`).hidden=!hasData;if(!hasData)destroyChart(key)}
+  /* ---------- กราฟเส้นนุ่ม + ตัวเลขกำกับจุด ---------- */
+  const mShort=["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+  const valueLabels={id:"valueLabels",afterDatasetsDraw(chart){
+    const ctx=chart.ctx;
+    chart.data.datasets.forEach((ds,i)=>{
+      if(!chart.isDatasetVisible(i)||ds.showLabels===false)return;
+      chart.getDatasetMeta(i).data.forEach((el,idx)=>{
+        const v=ds.data[idx];if(v===null||v===undefined||Number.isNaN(v)||!el)return;
+        const top=(ds.labelPos||"top")==="top",off=(ds.pointRadius||0)+8,txt=fmt(v),y=el.y+(top?-off:off);
+        ctx.save();ctx.font="700 13px Prompt, sans-serif";ctx.textAlign="center";ctx.textBaseline=top?"bottom":"top";
+        ctx.lineJoin="round";ctx.lineWidth=5;ctx.strokeStyle="rgba(255,255,255,.95)";ctx.strokeText(txt,el.x,y);
+        ctx.fillStyle=ds.labelColor||ds.borderColor;ctx.fillText(txt,el.x,y);ctx.restore();
+      });
+    });
+  }};
+  const avg=a=>{const v=a.filter(x=>x!=null);return v.length?v.reduce((x,y)=>x+y,0)/v.length:0};
+  function lineSet(label,data,color,pos,dash){return {label,data,borderColor:color,backgroundColor:color,borderWidth:6,borderDash:dash||[],pointRadius:8,pointHoverRadius:11,pointBackgroundColor:color,pointBorderColor:"#fff",pointBorderWidth:3,cubicInterpolationMode:"monotone",spanGaps:false,labelPos:pos}}
+  const lineScales=title=>({x:{offset:true,grid:{display:false},ticks:{font:{weight:"600"}}},y:{beginAtZero:false,grace:"18%",grid:{color:"rgba(20,50,80,.07)"},title:{display:true,text:title},ticks:{callback:v=>fmt(v)}}});
+  const linePad={top:36,bottom:36,left:26,right:30};
   function renderUnits(groups){
     const points=groups.filter(g=>g.hospital?.units!=null||g.residence?.units!=null);chartArea("units",points.length>0);if(!points.length||!window.Chart)return;
-    const years=[...new Set(points.map(g=>g.year))].sort((a,b)=>a-b),labels=filters.month?[Number(filters.month)]:[...new Set(points.map(g=>g.month))].sort((a,b)=>a-b),datasets=[];
-    for(const year of years)for(const [kind,label,color,dash] of [["hospital","โรงพยาบาล","#307bf0",[]],["residence","บ้านพัก","#eb5849",[6,3]]]){
+    const years=[...new Set(points.map(g=>g.year))].sort((a,b)=>a-b),labels=[...new Set(points.map(g=>g.month))].sort((a,b)=>a-b),datasets=[];
+    const all=k=>points.map(g=>g[k]?.units).filter(v=>v!=null),hTop=avg(all("hospital"))>=avg(all("residence"));
+    for(const year of years)for(const [kind,label,color,top] of [["hospital","โรงพยาบาล","#3b82f6",hTop],["residence","บ้านพัก","#ef4444",!hTop]]){
       const values=labels.map(month=>points.find(g=>g.year===year&&g.month===month)?.[kind]?.units??null);
       if(values.every(v=>v===null))continue;
-      datasets.push({label:`${label} · ปี ${year}`,data:values,borderColor:color,backgroundColor:color,borderDash:years.length>1?(dash.length?dash:[8,years.indexOf(year)%3*3+3]):dash,borderWidth:3,pointRadius:5,pointBackgroundColor:color,pointBorderColor:"#fff",pointBorderWidth:2,spanGaps:false,tension:.25});
+      const dash=years.length>1&&years.indexOf(year)>0?[10,6]:[];
+      datasets.push(lineSet(`${label} · ปี ${year}`,values,color,top?"top":"bottom",dash));
     }
-    $("units-frame").style.width=`${Math.max(650,labels.length*74+130)}px`;destroyChart("units");chartDefaults();
-    charts.units=new Chart($("units-canvas"),{type:"line",data:{labels:labels.map(m=>months[m-1]),datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:"nearest",intersect:false},plugins:{legend:{position:"bottom"},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${fmt(c.parsed.y)} Units`}}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,title:{display:true,text:"Units"},ticks:{callback:v=>fmt(v)}}}}});
+    $("units-frame").style.width=`${Math.max(650,labels.length*84+140)}px`;destroyChart("units");chartDefaults();
+    charts.units=new Chart($("units-canvas"),{type:"line",plugins:[valueLabels],data:{labels:labels.map(m=>months[m-1]),datasets},options:{responsive:true,maintainAspectRatio:false,layout:{padding:linePad},interaction:{mode:"nearest",intersect:false},plugins:{legend:{position:"bottom"},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${fmt(c.parsed.y)} Units`}}},scales:lineScales("Units")}});
   }
   function renderCost(groups){
     const items=groups.filter(g=>peaCost(g)!==null);chartArea("cost",items.length>0);$("cost-table").hidden=!items.length;$("cost-tbody").replaceChildren();
     items.forEach((g,i)=>{const prev=items[i-1],diff=prev&&g.year*12+g.month-(prev.year*12+prev.month)===1?peaCost(g)-peaCost(prev):null,tr=document.createElement("tr");[monthName(g.month,g.year),g.hospital?.costBaht==null?"—":money(g.hospital.costBaht),g.residence?.costBaht==null?"—":money(g.residence.costBaht),money(peaCost(g)),diff===null?"ยังเปรียบเทียบไม่ได้":`${diff>0?"+":""}${money(diff)}`].forEach(v=>tr.appendChild(make("td",v)));$("cost-tbody").appendChild(tr)});
     if(!items.length||!window.Chart)return;
-    $("cost-frame").style.width=`${Math.max(650,items.length*92+120)}px`;destroyChart("cost");chartDefaults();
-    charts.cost=new Chart($("cost-canvas"),{type:"bar",data:{labels:items.map(g=>monthName(g.month,g.year)),datasets:[{label:"โรงพยาบาล",data:items.map(g=>g.hospital?.costBaht??null),backgroundColor:"#307bf0",borderRadius:5,maxBarThickness:32},{label:"บ้านพัก",data:items.map(g=>g.residence?.costBaht??null),backgroundColor:"#eb5849",borderRadius:5,maxBarThickness:32}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:"index",intersect:false},plugins:{legend:{position:"bottom"},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${money(c.parsed.y)}`,footer:cs=>`รวมรายการที่มีข้อมูล: ${money(peaCost(items[cs[0].dataIndex]))}`}}},scales:{x:{ticks:{maxRotation:45,minRotation:0}},y:{beginAtZero:true,title:{display:true,text:"ค่าไฟ (บาท)"},ticks:{callback:v=>fmt(v)}}}}});
+    const hv=items.map(g=>g.hospital?.costBaht??null),rv=items.map(g=>g.residence?.costBaht??null),hTop=avg(hv)>=avg(rv);
+    $("cost-frame").style.width=`${Math.max(650,items.length*92+140)}px`;destroyChart("cost");chartDefaults();
+    charts.cost=new Chart($("cost-canvas"),{type:"line",plugins:[valueLabels],data:{labels:items.map(g=>`${mShort[g.month-1]} ${String(g.year).slice(-2)}`),datasets:[lineSet("โรงพยาบาล",hv,"#3b82f6",hTop?"top":"bottom"),lineSet("บ้านพัก",rv,"#ef4444",hTop?"bottom":"top")]},options:{responsive:true,maintainAspectRatio:false,layout:{padding:linePad},interaction:{mode:"index",intersect:false},plugins:{legend:{position:"bottom"},tooltip:{callbacks:{title:cs=>monthName(items[cs[0].dataIndex].month,items[cs[0].dataIndex].year),label:c=>`${c.dataset.label}: ${money(c.parsed.y)}`,footer:cs=>`รวมรายการที่มีข้อมูล: ${money(peaCost(items[cs[0].dataIndex]))}`}}},scales:lineScales("ค่าไฟ (บาท)")}});
   }
   function renderPMChart(inspections,counts){
     chartArea("pm-chart",inspections.length>0);if(!inspections.length||!window.Chart)return;destroyChart("pm");chartDefaults();
-    charts.pm=new Chart($("pm-canvas"),{type:"bar",data:{labels:["ผ่าน","ไม่ผ่าน","รอตรวจ"],datasets:[{label:"จำนวนรายการตรวจ",data:[counts.pass,counts.fail,counts.pending],backgroundColor:["#087253","#a82b32","#d3a431"],borderRadius:8,maxBarThickness:95}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${fmt(c.parsed.y)} รายการ`}}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,ticks:{precision:0,callback:v=>Number.isInteger(v)?fmt(v):""},title:{display:true,text:"จำนวนรายการตรวจ"}}}}});
+    charts.pm=new Chart($("pm-canvas"),{type:"bar",plugins:[valueLabels],data:{labels:["ผ่าน","ไม่ผ่าน","รอตรวจ"],datasets:[{label:"จำนวนรายการตรวจ",data:[counts.pass,counts.fail,counts.pending],backgroundColor:["#087253","#a82b32","#d3a431"],borderRadius:8,maxBarThickness:95,labelColor:"#234a60",labelPos:"top"}]},options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:30}},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${fmt(c.parsed.y)} รายการ`}}},scales:{x:{grid:{display:false}},y:{beginAtZero:true,grace:"10%",ticks:{precision:0,callback:v=>Number.isInteger(v)?fmt(v):""},title:{display:true,text:"จำนวนรายการตรวจ"}}}}});
   }
   function renderComparison(groups){
     const target=$("comparison-list");target.replaceChildren();$("comparison-empty").hidden=groups.length>0;
@@ -714,20 +794,97 @@ KSK Solar &amp; Power Monitoring System</h1>
       const solar=solarProduced(group.solar),units=peaUnits(group),cost=peaCost(group),noSolarUnits=solar!==null&&units!==null?units+solar:null,saved=estimate(group),noSolarCost=saved!==null&&cost!==null?cost+saved:null;
       const section=document.createElement("section"),caption=make("h4",`เดือน ${monthName(group.month,group.year)} · ข้อมูลตามตัวกรอง`,"comparison-caption"),scroll=make("div","","table-scroll"),table=make("table","","comparison");
       const thead=document.createElement("thead"),head=document.createElement("tr");
-      ["รายการวิเคราะห์หน่วยไฟ","กรณีไม่มีโซลาร์ · ประมาณการ","ปัจจุบัน (มีโซลาร์)"].forEach(text=>head.appendChild(make("th",text)));
+      ["รายการวิเคราะห์หน่วยไฟ","กรณีไม่มีโซลาร์","ปัจจุบัน (มีโซลาร์)"].forEach(text=>head.appendChild(make("th",text)));
       thead.appendChild(head);
       const tbody=document.createElement("tbody");
       function row(label,without,current){const tr=document.createElement("tr");tr.append(make("th",label),make("td",without),make("td",current));tbody.appendChild(tr)}
-      row("ปริมาณการใช้ไฟรวม · Units",noSolarUnits===null?"ยังคำนวณไม่ได้":`${fmt(noSolarUnits)} Units (ประมาณการ)`,units===null?empty:`${fmt(units)} Units`);
-      row("รวมยอดที่ต้องชำระ (บิล PEA) · บาท",noSolarCost===null?"ยังคำนวณไม่ได้":`${money(noSolarCost)} (ประมาณการ)`,cost===null?empty:money(cost));
-      row("ส่วนต่างที่ประหยัดได้ · บาท",saved===null?"ยังคำนวณไม่ได้":`${money(saved)} (ประมาณการ)`,saved===null?"ยังคำนวณไม่ได้":"ไม่ใช่รายการในบิล PEA");
+      row("ปริมาณการใช้ไฟรวม · Units",noSolarUnits===null?"ยังคำนวณไม่ได้":`${fmt(noSolarUnits)} Units`,units===null?empty:`${fmt(units)} Units`);
+      row("รวมยอดที่ต้องชำระ (บิล PEA) · บาท",noSolarCost===null?"ยังคำนวณไม่ได้":money(noSolarCost),cost===null?empty:money(cost));
+      row("ส่วนต่างที่ประหยัดได้ · บาท","—",saved===null?"ยังคำนวณไม่ได้":money(saved));
       table.append(thead,tbody);scroll.appendChild(table);section.append(caption,scroll);target.appendChild(section);
     });
   }
+  function periodLabel(){
+    if(filters.month)return months[Number(filters.month)-1];
+    if(filters.quarter){const q=Number(filters.quarter);return `ไตรมาส ${q} (${mShort[q*3-3]} – ${mShort[q*3-1]})`}
+    return "ทั้งปี";
+  }
+  function refYear(){if(filters.year)return Number(filters.year);const ys=state.energyRecords.map(r=>Number(r.year)).filter(Number.isFinite);return ys.length?Math.max(...ys):null}
+  function periodMonths(){if(filters.month)return [Number(filters.month)];if(filters.quarter){const q=Number(filters.quarter);return [q*3-2,q*3-1,q*3]}return null}
+  function groupsFor(year,list){return grouped(state.energyRecords.filter(r=>Number(r.year)===year&&(!list||list.includes(Number(r.month)))))}
+  function setCard(id,value,unit,help){const el=$(id);el.textContent=value;el.classList.toggle("is-empty",/^(ยัง|—)/.test(value));$(`${id}-unit`).textContent=unit||"";if($(`${id}-help`))$(`${id}-help`).textContent=help||""}
+  function renderYearStats(){
+    const Y=refYear();
+    if(Y===null){setCard("kpi-yoy","ยังไม่มีข้อมูล","","");setCard("kpi-cumcost","ยังไม่มีข้อมูล","","");setCard("kpi-cumsave","ยังคำนวณไม่ได้","","");return}
+    const pm=periodMonths(),cur=groupsFor(Y,pm),prev=groupsFor(Y-1,pm);
+    const both=cur.filter(c=>peaCost(c)!==null&&prev.some(p=>p.month===c.month&&peaCost(p)!==null));
+    if(!both.length){setCard("kpi-yoy","ยังเปรียบเทียบไม่ได้",`ช่วง ${periodLabel()} ปี พ.ศ. ${Y}`,`ต้องมีค่าไฟของเดือนเดียวกันทั้งปี ${Y} และ ${Y-1}`)}
+    else{
+      const pick=(list,fn)=>sumPresent(both.map(c=>fn(list.find(g=>g.month===c.month))));
+      const cc=pick(cur,peaCost),pc=pick(prev,peaCost),cu=pick(cur,peaUnits),pu=pick(prev,peaUnits),diff=cc-pc,pct=pc>0?Math.abs(diff)/pc*100:null;
+      const arrow=diff>0?"▲":diff<0?"▼":"–";
+      setCard("kpi-yoy",pct===null?`${arrow} ${money(Math.abs(diff))}`:`${arrow} ${fmt(pct)}%`,`ค่าไฟ${diff>0?"เพิ่มขึ้น":diff<0?"ลดลง":"เท่าเดิม"} ${money(Math.abs(diff))}`,
+        `ปี ${Y}: ${money(cc)} · ปี ${Y-1}: ${money(pc)}${cu!==null&&pu!==null?` · หน่วยไฟ ${fmt(cu)} เทียบ ${fmt(pu)} Units`:""} · ${periodLabel()} · เทียบ ${both.length} เดือนที่มีข้อมูลทั้งสองปี`);
+    }
+    const year=groupsFor(Y,null),costs=year.filter(g=>peaCost(g)!==null),saves=year.map(estimate).filter(v=>v!==null);
+    costs.length?setCard("kpi-cumcost",fmt(sumPresent(costs.map(peaCost))),`บาท · ปี พ.ศ. ${Y}`,`รวมค่าไฟโรงพยาบาลและบ้านพัก ${costs.length} เดือนที่มีข้อมูล (ไม่ขึ้นกับตัวกรองเดือน/ไตรมาส)`):setCard("kpi-cumcost","ยังไม่มีข้อมูล",`ปี พ.ศ. ${Y}`,"");
+    saves.length?setCard("kpi-cumsave",fmt(saves.reduce((a,b)=>a+b,0)),`บาท · ปี พ.ศ. ${Y}`,`รวม ${saves.length} เดือนที่คำนวณได้ จากโซลาร์ที่ผลิต × อัตราค่าไฟเฉลี่ยต่อหน่วยของเดือนนั้น`):setCard("kpi-cumsave","ยังคำนวณไม่ได้",`ปี พ.ศ. ${Y}`,"ต้องมีข้อมูลโซลาร์ หน่วยไฟ และค่าไฟของเดือนเดียวกัน");
+  }
+
+  /* ---------- การล้างแผง ---------- */
+  const WASH_DAYS=365,WASH_WARN=30;
+  const washBuildings=[["อาคารผู้ป่วยใน","100 kW","🏥","wash-in"],["อาคารทันตกรรม","10 kW","🦷","wash-dental"]];
+  function parseDay(s){const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(String(s||""));return m?new Date(Number(m[1]),Number(m[2])-1,Number(m[3])):null}
+  const dayFmt=d=>new Intl.DateTimeFormat("th-TH-u-ca-buddhist",{dateStyle:"medium"}).format(d);
+  function todayStart(){const n=new Date();return new Date(n.getFullYear(),n.getMonth(),n.getDate())}
+  function renderWash(){
+    const wrap=$("wash-cards");wrap.replaceChildren();const today=todayStart();
+    washBuildings.forEach(([name,kw,icon,cls])=>{
+      const recs=state.washRecords.filter(r=>r.building===name&&parseDay(r.washDate)).sort((a,b)=>String(b.washDate).localeCompare(String(a.washDate)));
+      const last=recs[0]?parseDay(recs[0].washDate):null,card=make("article","",`kpi ${cls}`);
+      card.appendChild(make("p",`${icon} ${name} ${kw}`,"kpi-label"));
+      if(!last){
+        card.append(make("p","ยังไม่มีบันทึก","kpi-number is-empty"),make("p","ยังไม่เคยบันทึกการล้างแผง","kpi-unit"),make("p","⏳ ควรล้างแผงอย่างน้อยปีละ 1 ครั้ง","kpi-help"));
+      }else{
+        const ago=Math.round((today-last)/86400000),due=new Date(last.getFullYear(),last.getMonth(),last.getDate()+WASH_DAYS),left=Math.round((due-today)/86400000);
+        const status=left<0?`🔴 เกินกำหนดแล้ว ${fmt(-left)} วัน`:left<=WASH_WARN?`🟡 ใกล้ครบกำหนด (อีก ${fmt(left)} วัน)`:`🟢 ยังไม่ถึงกำหนด (อีก ${fmt(left)} วัน)`;
+        card.append(make("p",dayFmt(last),"kpi-number"),make("p",`ล้างล่าสุด · ${ago===0?"วันนี้":`${fmt(ago)} วันที่แล้ว`}`,"kpi-unit"),make("p",`ครบกำหนดครั้งถัดไป: ${dayFmt(due)} · ${status}`,"kpi-help"));
+      }
+      wrap.appendChild(card);
+    });
+    const rows=state.washRecords.filter(r=>parseDay(r.washDate)).sort((a,b)=>String(b.washDate).localeCompare(String(a.washDate)));
+    $("wash-empty").hidden=rows.length>0;$("wash-table").hidden=rows.length===0;$("wash-tbody").replaceChildren();
+    rows.forEach(r=>{const tr=document.createElement("tr");[dayFmt(parseDay(r.washDate)),r.building,r.washer||"—",r.note||"—"].forEach(v=>tr.appendChild(make("td",v)));$("wash-tbody").appendChild(tr)});
+  }
+  $("wash-date").value=(()=>{const n=new Date();return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,"0")}-${String(n.getDate()).padStart(2,"0")}`})();
+  $("wash-form").addEventListener("submit",async event=>{
+    event.preventDefault();
+    const building=$("wash-building").value,washDate=$("wash-date").value,washer=$("wash-by").value.trim(),note=$("wash-note").value.trim();
+    if(!building)return $("wash-building").focus(),notify("wash-notice","กรุณาเลือกอาคาร","error");
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(washDate))return $("wash-date").focus(),notify("wash-notice","กรุณาเลือกวันที่ล้างแผง","error");
+    if(parseDay(washDate)>todayStart())return $("wash-date").focus(),notify("wash-notice","วันที่ล้างแผงต้องไม่เป็นวันในอนาคต","error");
+    if(!washer)return $("wash-by").focus(),notify("wash-notice","กรุณาระบุผู้ดำเนินการล้าง","error");
+    const record={id:`wash-${Date.now()}-${Math.random().toString(36).slice(2,8)}`,washDate,building,washer,note},button=$("wash-form").querySelector('button[type="submit"]');
+    button.disabled=true;notify("wash-notice","กำลังบันทึก...","warning");
+    try{
+      if(apiReady())await api({action:"saveWash",record});
+      state.washRecords.unshift(record);$("wash-by").value="";$("wash-note").value="";
+      notify("wash-notice",`บันทึกการล้างแผง ${building} เมื่อ ${dayFmt(parseDay(washDate))}${apiReady()?" ลง Google Sheet แล้ว":" ในหน้านี้แล้ว (ยังไม่ได้เชื่อม Google Sheet)"}`,"success");
+      renderDashboard();
+    }catch(e){notify("wash-notice","บันทึกไม่สำเร็จ: "+e.message,"error")}
+    finally{button.disabled=false}
+  });
+
+  /* ---------- ซ่อน/แสดงตารางประวัติ ---------- */
+  let historyOpen=true;
+  function applyHistoryToggle(){$("history-body").hidden=!historyOpen;const b=$("history-toggle");b.setAttribute("aria-expanded",String(historyOpen));b.textContent=historyOpen?"ซ่อนตาราง ▲":"แสดงตาราง ▼"}
+  $("history-toggle").addEventListener("click",()=>{historyOpen=!historyOpen;applyHistoryToggle()});
+
   function renderDashboard(){
+    populateYears();
     const rows=energyRows(),inspections=pmRows(),groups=grouped(rows),counts=pmCounts(inspections);
     const dates=[...rows.map(r=>r.savedAt),...inspections.map(r=>r.inspectionDate)].filter(Boolean).sort();
-    const range=filters.month||filters.year?`${filters.month?months[Number(filters.month)-1]:"ทุกเดือน"} / ${filters.year||"ทุกปี พ.ศ."}`:"ทุกเดือน / ทุกปี พ.ศ.";
+    const range=`${filters.year||"ทุกปี พ.ศ."} / ${periodLabel()}`;
     $("dashboard-range").textContent=`ช่วงข้อมูล: ${range} · PM: ${filters.building||"ทุกอาคาร"} · ${dates.length?`อัปเดตล่าสุด ${new Intl.DateTimeFormat("th-TH-u-ca-buddhist",{dateStyle:"medium",timeStyle:"short"}).format(new Date(dates.at(-1)))}`:"ยังไม่มีข้อมูลในช่วงที่เลือก"}`;
     const solarRows=rows.filter(r=>r.kind==="solar");
     const solar10=sumPresent(solarRows.map(r=>r.produced10Kwh)),solar100=sumPresent(solarRows.map(r=>r.produced100Kwh)),totalSolar=sumPresent(solarRows.map(solarProduced));
@@ -739,7 +896,8 @@ KSK Solar &amp; Power Monitoring System</h1>
     $("kpi-pm").textContent=inspections.length?`ผ่าน ${fmt(counts.pass)} · ไม่ผ่าน ${fmt(counts.fail)} · รอตรวจ ${fmt(counts.pending)}`:"ยังไม่มีผลตรวจ";
     $("kpi-pm").classList.toggle("is-empty",!inspections.length);
     $("saving-detail").textContent=saving===null?"ยังไม่มีข้อมูลเพียงพอสำหรับประมาณการ":money(saving);
-    renderComparison(groups);renderUnits(groups);renderCost(groups);renderPMChart(inspections,counts);
+    renderComparison(groups);renderUnits(groups);renderCost(groups);renderPMChart(inspections,counts);renderYearStats();renderWash();
+    $("history-count").textContent=`(${fmt(inspections.length)} รายการ)`;
     const summary=$("energy-summary");summary.replaceChildren();
     [["ใช้ไฟจาก PEA",totalPEA===null?empty:`${fmt(totalPEA)} Units / kWh`,"border-[#3984bf]"],["ผลิตจากโซลาร์",totalSolar===null?empty:`${fmt(totalSolar)} kWh`,"border-[#18a78c]"],["เปอร์เซ็นต์การลดใช้ไฟ",reduction===null?"ยังคำนวณไม่ได้":`${fmt(reduction)}%`,"border-[#9580bb]"]].forEach(([label,value,border])=>{const card=make("article","",`rounded-2xl border-l-4 ${border} bg-[#f4f9fc] p-5`);card.append(make("p",label,"font-semibold"),make("p",value,"font-extrabold mt-2"));summary.appendChild(card)});
     $("carbon-empty").textContent="ยังไม่มีข้อมูลเพียงพอสำหรับคำนวณการลดคาร์บอน — ไม่มีค่าปัจจัยการปล่อย (emission factor) ในข้อมูลที่กรอก จึงไม่แสดงกราฟหรือค่า CO₂ สมมติ";
@@ -760,15 +918,6 @@ KSK Solar &amp; Power Monitoring System</h1>
       [date,r.building,r.technician,String(Object.keys(r.checks).length),String(c.pass),String(c.fail),String(c.pending)].forEach(v=>tr.appendChild(make("td",v)));
       const cell=document.createElement("td");cell.appendChild(make("span",status,`badge ${c.fail?"fail":c.pending?"wait":"pass"}`));tr.append(cell,make("td",r.note||"—"));$("history-tbody").appendChild(tr);
     });
-    const executive=$("executive-content");executive.replaceChildren();const insights=[],costGroups=groups.filter(g=>peaCost(g)!==null);
-    if(costGroups.length>=2){const last=costGroups.at(-1),prev=costGroups.at(-2);if(last.year*12+last.month-(prev.year*12+prev.month)===1){const diff=peaCost(last)-peaCost(prev);insights.push(`ค่าไฟ ${monthName(last.month,last.year)} ${diff>0?"เพิ่มขึ้น":diff<0?"ลดลง":"เท่ากับเดือนก่อน"} ${money(Math.abs(diff))}`)}}
-    const solarGroups=groups.filter(g=>solarProduced(g.solar)!==null);
-    if(solarGroups.length>=2){const last=solarGroups.at(-1),prev=solarGroups.at(-2);if(last.year*12+last.month-(prev.year*12+prev.month)===1){const diff=solarProduced(last.solar)-solarProduced(prev.solar);insights.push(`โซลาร์ ${monthName(last.month,last.year)} ผลิต${diff>0?"เพิ่ม":diff<0?"ลด":"เท่าเดิม"} ${fmt(Math.abs(diff))} kWh เทียบเดือนก่อน`)}}
-    if(counts.fail)insights.push(`มี ${fmt(counts.fail)} รายการตรวจ PM ไม่ผ่านที่ต้องติดตาม`);
-    const ranked=groups.map(group=>({group,value:estimate(group)})).filter(item=>item.value!==null).sort((a,b)=>b.value-a.value);
-    if(ranked.length)insights.push(`เดือนที่มีประมาณการเงินประหยัดสูงที่สุดในช่วงที่เลือก: ${monthName(ranked[0].group.month,ranked[0].group.year)} (${money(ranked[0].value)}; ไม่ใช่ยอดประหยัดที่ตรวจวัดจริง)`);
-    if(!insights.length)insights.push("ข้อมูลยังไม่พอสำหรับสรุปแนวโน้ม: กรอกข้อมูลพลังงานอย่างน้อยสองเดือนต่อเนื่อง พร้อมค่าไฟและหน่วยการใช้ และบันทึกผลตรวจ PM");
-    insights.forEach(text=>executive.appendChild(make("p",text,"rounded-xl bg-[#fdf8e6] border border-[#ead9a0] p-4")));
   }
   updateCleaningNote();showView("inspection");if(window.lucide)lucide.createIcons();
   loadAll();
