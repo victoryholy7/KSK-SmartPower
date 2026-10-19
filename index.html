@@ -225,7 +225,68 @@ KSK Solar &amp; Power Monitoring System</h1>
         </form>
       </section>
 
-      <section class="dash-group" data-g="solar" aria-labelledby="solar-group-title">
+<section class="dash-group" data-g="inspect" aria-labelledby="inspection-group-title">
+        <h3 id="inspection-group-title" class="group-heading">ผลการตรวจเช็กระบบ</h3>
+        <div class="grid gap-5">
+          <article class="kpi status">
+            <div class="flex items-start gap-2"><i data-lucide="clipboard-check" aria-hidden="true"></i><p class="kpi-label">สถานะการตรวจ PM</p></div>
+            <p id="kpi-pm" class="kpi-number"></p>
+            <button type="button" data-go="inspection" class="underline text-left mt-3" style="color:#fff">ไปหน้าตรวจเช็กระบบ →</button>
+          </article>
+          <section class="glass-card" aria-labelledby="fault-title">
+            <div class="stripe"></div>
+            <div class="card-head"><h4 id="fault-title" class="ch">สรุปการเสียและสถานะผิดปกติ</h4></div>
+            <div id="fault-content" class="dash-body" aria-live="polite"></div>
+          </section>
+          <section class="glass-card" aria-labelledby="history-title">
+            <div class="stripe"></div>
+            <div class="card-head head-row"><h4 id="history-title" class="ch">ตารางประวัติการตรวจเช็กระบบ <span id="history-count" class="text-sm font-semibold" style="color:#52707f"></span></h4><button type="button" id="history-toggle" class="toggle-btn" aria-expanded="true" aria-controls="history-body">ซ่อนตาราง ▲</button></div>
+            <div id="history-body" class="dash-body">
+              <div id="history-empty" class="empty">
+                <p class="mb-3" style="color:#425b6a">ยังไม่มีประวัติการตรวจเช็กระบบตามตัวกรอง</p>
+                <button type="button" data-go="inspection" class="secondary-button px-4 min-h-12">ไปหน้าตรวจเช็กระบบ</button>
+              </div>
+              <div class="table-scroll tall">
+                <table id="history-table" class="data-table" hidden>
+                  <thead><tr><th>วันที่ตรวจ</th><th>อาคาร</th><th>ผู้ตรวจ</th><th>รายการ</th><th>ผ่าน</th><th>ไม่ผ่าน</th><th>รอตรวจ</th><th>สถานะรวม</th><th>หมายเหตุ</th></tr></thead>
+                  <tbody id="history-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+<section class="dash-group" data-g="wash" aria-labelledby="wash-group-title">
+        <h3 id="wash-group-title" class="group-heading">การล้างแผงโซลาร์เซลล์ (ปีละ 1 ครั้ง)</h3>
+        <div class="grid gap-5">
+          <div id="wash-cards" class="wash-grid" aria-live="polite"></div>
+          <section class="glass-card" aria-labelledby="wash-history-title">
+            <div class="stripe"></div>
+            <div class="card-head head-row"><h4 id="wash-history-title" class="ch">ประวัติการล้างแผง</h4><button type="button" data-go="inspection" class="toggle-btn">+ บันทึกการล้างแผง</button></div>
+            <div class="dash-body">
+              <p id="wash-empty" class="empty">ยังไม่มีบันทึกการล้างแผง กดปุ่ม "+ บันทึกการล้างแผง" เพื่อเพิ่มรายการ</p>
+              <div class="table-scroll tall">
+                <table id="wash-table" class="data-table" hidden>
+                  <thead><tr><th>วันที่ล้าง</th><th>อาคาร</th><th>ผู้ดำเนินการ</th><th>หมายเหตุ</th></tr></thead>
+                  <tbody id="wash-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+<section class="glass-card" aria-labelledby="pm-chart-title">
+            <div class="stripe"></div>
+            <div class="card-head"><h4 id="pm-chart-title" class="ch">กราฟสรุปผลการตรวจ PM</h4></div>
+            <div class="dash-body">
+              <p id="pm-chart-empty" class="empty" hidden>ยังไม่มีผลตรวจ PM ตามตัวกรอง</p>
+              <div id="pm-chart-scroll" class="chart-scroll"><div class="chart-frame pm-frame"><canvas id="pm-canvas" role="img" aria-label="จำนวนรายการตรวจผ่าน ไม่ผ่าน และรอตรวจ"></canvas></div></div>
+            </div>
+          </section>
+
+<section class="dash-group" data-g="solar" aria-labelledby="solar-group-title">
         <h3 id="solar-group-title" class="group-heading">สรุปโซลาร์เซลล์</h3>
         <div class="kpi-grid">
           <article class="kpi solar10"><div class="flex items-start gap-2"><i data-lucide="sun-medium" aria-hidden="true"></i><p class="kpi-label">ผลิตไฟฟ้าโซลาร์ ระบบ 10 kW</p></div><p id="kpi-solar-10" class="kpi-number" aria-live="polite"></p><p id="kpi-solar-10-unit" class="kpi-unit"></p><p class="kpi-help">จากข้อมูลการผลิตจริงของระบบ 10 kW</p></article>
@@ -239,6 +300,10 @@ KSK Solar &amp; Power Monitoring System</h1>
         </section>
       </section>
 
+
+
+      
+
       <section class="dash-group" data-g="electric" aria-labelledby="electric-group-title">
         <h3 id="electric-group-title" class="group-heading">สรุปการใช้ไฟและค่าใช้จ่าย</h3>
         <div class="kpi-grid">
@@ -246,6 +311,8 @@ KSK Solar &amp; Power Monitoring System</h1>
           <article class="kpi cost"><div class="flex items-start gap-2"><i data-lucide="receipt" aria-hidden="true"></i><p class="kpi-label">ค่าไฟ PEA</p></div><p id="kpi-cost" class="kpi-number"></p><p id="kpi-cost-unit" class="kpi-unit"></p><p class="kpi-help">รวมค่าไฟโรงพยาบาลและบ้านพักที่บันทึก</p></article>
           <article class="kpi reduction"><div class="flex items-start gap-2"><i data-lucide="trending-down" aria-hidden="true"></i><p class="kpi-label">เปอร์เซ็นต์การลดใช้ไฟ</p></div><p id="kpi-reduction" class="kpi-number"></p><p id="kpi-reduction-unit" class="kpi-unit"></p><p class="kpi-help">โซลาร์ ÷ (โซลาร์ + ไฟ PEA) × 100</p></article>
           <article class="kpi saving"><div class="flex items-start gap-2"><i data-lucide="coins" aria-hidden="true"></i><p class="kpi-label">ประมาณการเงินที่ประหยัดได้</p></div><p id="kpi-saving" class="kpi-number"></p><p id="kpi-saving-unit" class="kpi-unit"></p><p class="kpi-help">ค่าประมาณการ ไม่ใช่ยอดประหยัดที่ตรวจวัดจริง</p></article>
+          <article class="kpi residence-card" style="background:linear-gradient(135deg,#51428b,#8b6bd1);color:#fff"><div class="flex items-start gap-2"><i data-lucide="house" aria-hidden="true"></i><p class="kpi-label">หน่วยไฟฟ้าบ้านพัก</p></div><p id="kpi-residence-units" class="kpi-number"></p><p id="kpi-residence-units-unit" class="kpi-unit"></p><p class="kpi-help">หน่วยไฟจาก PEA เฉพาะบ้านพักตามช่วงที่เลือก</p></article>
+          <article class="kpi residence-card" style="background:linear-gradient(135deg,#6d3d8c,#bd6bc8);color:#fff"><div class="flex items-start gap-2"><i data-lucide="receipt" aria-hidden="true"></i><p class="kpi-label">ค่าไฟฟ้าบ้านพัก</p></div><p id="kpi-residence-cost" class="kpi-number"></p><p id="kpi-residence-cost-unit" class="kpi-unit"></p><p class="kpi-help">ค่าใช้จ่ายตามข้อมูลบิลที่บันทึกสำหรับบ้านพัก</p></article>
         </div>
         <div class="wash-grid mt-4">
           <article class="kpi total"><div class="flex items-start gap-2"><i data-lucide="plug-zap" aria-hidden="true"></i><p class="kpi-label">รวมการใช้ไฟฟ้าทั้งหมด (PEA + โซลาร์)</p></div><p id="kpi-total" class="kpi-number" aria-live="polite"></p><p id="kpi-total-unit" class="kpi-unit"></p><p id="kpi-total-help" class="kpi-help"></p></article>
@@ -325,72 +392,30 @@ KSK Solar &amp; Power Monitoring System</h1>
             <div class="stripe"></div>
             <div class="card-head"><h4 id="carbon-title" class="ch">การลดการปล่อยคาร์บอน</h4></div>
             <div class="dash-body">
-              <p id="carbon-empty" class="empty"></p>
-              <p class="mt-3" style="color:#425b6a">ค่า CO₂ ที่หลีกเลี่ยงได้จะเป็นค่าประมาณการจาก kWh × emission factor ไม่ใช่ค่าที่ตรวจวัดโดยตรง</p>
+              <div class="kpi-grid">
+                <article class="kpi" style="background:linear-gradient(135deg,#14532d,#16a34a);color:#fff">
+                  <div class="flex items-start gap-2"><i data-lucide="leaf" aria-hidden="true"></i><p class="kpi-label">ลดการปล่อยคาร์บอนเฉลี่ย</p></div>
+                  <p id="carbon-monthly" class="kpi-number"></p><p class="kpi-unit">Kg CO₂e/month</p>
+                  <p class="kpi-help">เฉลี่ยต่อเดือนจากไฟฟ้าโซลาร์ที่ผลิตได้ในช่วงข้อมูลที่เลือก</p>
+                </article>
+                <article class="kpi" style="background:linear-gradient(135deg,#166534,#0f766e);color:#fff">
+                  <div class="flex items-start gap-2"><i data-lucide="sprout" aria-hidden="true"></i><p class="kpi-label">ลดการปล่อยคาร์บอนรวม</p></div>
+                  <p id="carbon-total" class="kpi-number"></p><p class="kpi-unit">Kg CO₂e · รวมช่วงที่เลือก</p>
+                  <p class="kpi-help">ประมาณการจากพลังงานโซลาร์รวม ไม่ใช่การตรวจวัดโดยตรง</p>
+                </article>
+              </div>
+              <p id="carbon-empty" class="empty mt-4" hidden></p>
+              <p id="carbon-method" class="mt-4 rounded-xl p-4" style="background:#edf8f1;color:#24543c"></p>
+              <p class="mt-3 text-sm" style="color:#425b6a">ปัจจัยการปล่อยไฟฟ้าที่ใช้: 0.4999 kgCO₂e/kWh ตามตาราง Emission Factor (CFO) ขององค์การบริหารจัดการก๊าซเรือนกระจก (อบก.) เดือนมกราคม 2569; ใช้พลังงานโซลาร์ที่ผลิตได้เป็นตัวแทนไฟฟ้าจากโครงข่ายที่หลีกเลี่ยงได้</p>
             </div>
           </section>
-          <section class="glass-card" aria-labelledby="pm-chart-title">
-            <div class="stripe"></div>
-            <div class="card-head"><h4 id="pm-chart-title" class="ch">กราฟสรุปผลการตรวจ PM</h4></div>
-            <div class="dash-body">
-              <p id="pm-chart-empty" class="empty" hidden>ยังไม่มีผลตรวจ PM ตามตัวกรอง</p>
-              <div id="pm-chart-scroll" class="chart-scroll"><div class="chart-frame pm-frame"><canvas id="pm-canvas" role="img" aria-label="จำนวนรายการตรวจผ่าน ไม่ผ่าน และรอตรวจ"></canvas></div></div>
-            </div>
-          </section>
+          
         </div>
       </section>
 
-      <section class="dash-group" data-g="inspect" aria-labelledby="inspection-group-title">
-        <h3 id="inspection-group-title" class="group-heading">ผลการตรวจเช็กระบบ</h3>
-        <div class="grid gap-5">
-          <article class="kpi status">
-            <div class="flex items-start gap-2"><i data-lucide="clipboard-check" aria-hidden="true"></i><p class="kpi-label">สถานะการตรวจ PM</p></div>
-            <p id="kpi-pm" class="kpi-number"></p>
-            <button type="button" data-go="inspection" class="underline text-left mt-3" style="color:#fff">ไปหน้าตรวจเช็กระบบ →</button>
-          </article>
-          <section class="glass-card" aria-labelledby="fault-title">
-            <div class="stripe"></div>
-            <div class="card-head"><h4 id="fault-title" class="ch">สรุปการเสียและสถานะผิดปกติ</h4></div>
-            <div id="fault-content" class="dash-body" aria-live="polite"></div>
-          </section>
-          <section class="glass-card" aria-labelledby="history-title">
-            <div class="stripe"></div>
-            <div class="card-head head-row"><h4 id="history-title" class="ch">ตารางประวัติการตรวจเช็กระบบ <span id="history-count" class="text-sm font-semibold" style="color:#52707f"></span></h4><button type="button" id="history-toggle" class="toggle-btn" aria-expanded="true" aria-controls="history-body">ซ่อนตาราง ▲</button></div>
-            <div id="history-body" class="dash-body">
-              <div id="history-empty" class="empty">
-                <p class="mb-3" style="color:#425b6a">ยังไม่มีประวัติการตรวจเช็กระบบตามตัวกรอง</p>
-                <button type="button" data-go="inspection" class="secondary-button px-4 min-h-12">ไปหน้าตรวจเช็กระบบ</button>
-              </div>
-              <div class="table-scroll tall">
-                <table id="history-table" class="data-table" hidden>
-                  <thead><tr><th>วันที่ตรวจ</th><th>อาคาร</th><th>ผู้ตรวจ</th><th>รายการ</th><th>ผ่าน</th><th>ไม่ผ่าน</th><th>รอตรวจ</th><th>สถานะรวม</th><th>หมายเหตุ</th></tr></thead>
-                  <tbody id="history-tbody"></tbody>
-                </table>
-              </div>
-            </div>
-          </section>
-        </div>
-      </section>
+      
 
-      <section class="dash-group" data-g="wash" aria-labelledby="wash-group-title">
-        <h3 id="wash-group-title" class="group-heading">การล้างแผงโซลาร์เซลล์ (ปีละ 1 ครั้ง)</h3>
-        <div class="grid gap-5">
-          <div id="wash-cards" class="wash-grid" aria-live="polite"></div>
-          <section class="glass-card" aria-labelledby="wash-history-title">
-            <div class="stripe"></div>
-            <div class="card-head head-row"><h4 id="wash-history-title" class="ch">ประวัติการล้างแผง</h4><button type="button" data-go="inspection" class="toggle-btn">+ บันทึกการล้างแผง</button></div>
-            <div class="dash-body">
-              <p id="wash-empty" class="empty">ยังไม่มีบันทึกการล้างแผง กดปุ่ม "+ บันทึกการล้างแผง" เพื่อเพิ่มรายการ</p>
-              <div class="table-scroll tall">
-                <table id="wash-table" class="data-table" hidden>
-                  <thead><tr><th>วันที่ล้าง</th><th>อาคาร</th><th>ผู้ดำเนินการ</th><th>หมายเหตุ</th></tr></thead>
-                  <tbody id="wash-tbody"></tbody>
-                </table>
-              </div>
-            </div>
-          </section>
-        </div>
-      </section>
+      
     </section>
 
     <!-- ================= PM FORM ================= -->
@@ -953,10 +978,12 @@ KSK Solar &amp; Power Monitoring System</h1>
     const solarRows=rows.filter(r=>r.kind==="solar");
     const solar10=sumPresent(solarRows.map(r=>r.produced10Kwh)),solar100=sumPresent(solarRows.map(r=>r.produced100Kwh)),totalSolar=sumPresent(solarRows.map(solarProduced));
     const totalPEA=sumPresent(groups.map(peaUnits)),totalCost=sumPresent(groups.map(peaCost));
+    const residenceUnits=sumPresent(groups.map(g=>g.residence?.units)),residenceCost=sumPresent(groups.map(g=>g.residence?.costBaht));
     const reduction=totalSolar!==null&&totalPEA!==null&&totalSolar+totalPEA>0?100*totalSolar/(totalSolar+totalPEA):null;
     const estimates=groups.map(estimate).filter(v=>v!==null),saving=estimates.length?estimates.reduce((a,b)=>a+b,0):null;
     kpi("kpi-solar-10",solar10,"kWh");kpi("kpi-solar-100",solar100,"kWh");kpi("kpi-solar",totalSolar,"kWh");
     kpi("kpi-pea",totalPEA,"Units / kWh");kpi("kpi-cost",totalCost,"บาท");kpi("kpi-reduction",reduction,"%");kpi("kpi-saving",saving,"บาท · ค่าประมาณการ");
+    kpi("kpi-residence-units",residenceUnits,"Units / kWh");kpi("kpi-residence-cost",residenceCost,"บาท");
     $("kpi-pm").textContent=inspections.length?`ผ่าน ${fmt(counts.pass)} · ไม่ผ่าน ${fmt(counts.fail)} · รอตรวจ ${fmt(counts.pending)}`:"ยังไม่มีผลตรวจ";
     $("kpi-pm").classList.toggle("is-empty",!inspections.length);
     $("saving-detail").textContent=saving===null?"ยังไม่มีข้อมูลเพียงพอสำหรับประมาณการ":money(saving);
@@ -964,7 +991,18 @@ KSK Solar &amp; Power Monitoring System</h1>
     $("history-count").textContent=`(${fmt(inspections.length)} รายการ)`;
     const summary=$("energy-summary");summary.replaceChildren();
     [["ใช้ไฟจาก PEA",totalPEA===null?empty:`${fmt(totalPEA)} Units / kWh`,"border-[#3984bf]"],["ผลิตจากโซลาร์",totalSolar===null?empty:`${fmt(totalSolar)} kWh`,"border-[#18a78c]"],["เปอร์เซ็นต์การลดใช้ไฟ",reduction===null?"ยังคำนวณไม่ได้":`${fmt(reduction)}%`,"border-[#9580bb]"]].forEach(([label,value,border])=>{const card=make("article","",`rounded-2xl border-l-4 ${border} bg-[#f4f9fc] p-5`);card.append(make("p",label,"font-semibold"),make("p",value,"font-extrabold mt-2"));summary.appendChild(card)});
-    $("carbon-empty").textContent="ยังไม่มีข้อมูลเพียงพอสำหรับคำนวณการลดคาร์บอน — ไม่มีค่าปัจจัยการปล่อย (emission factor) ในข้อมูลที่กรอก จึงไม่แสดงกราฟหรือค่า CO₂ สมมติ";
+    const GRID_EMISSION_FACTOR=0.4999; // kgCO2e/kWh — TGO CFO Emission Factor, Jan 2026
+    const solarMonths=groups.filter(g=>solarProduced(g.solar)!==null);
+    const solarForCarbon=sumPresent(solarMonths.map(g=>solarProduced(g.solar)));
+    const carbonTotal=solarForCarbon===null?null:solarForCarbon*GRID_EMISSION_FACTOR;
+    const carbonMonthly=carbonTotal!==null&&solarMonths.length?carbonTotal/solarMonths.length:null;
+    $("carbon-monthly").textContent=carbonMonthly===null?"ยังไม่มีข้อมูล":fmt(carbonMonthly);
+    $("carbon-total").textContent=carbonTotal===null?"ยังไม่มีข้อมูล":fmt(carbonTotal);
+    $("carbon-monthly").classList.toggle("is-empty",carbonMonthly===null);
+    $("carbon-total").classList.toggle("is-empty",carbonTotal===null);
+    $("carbon-empty").hidden=carbonTotal!==null;
+    $("carbon-empty").textContent=carbonTotal===null?"ยังไม่มีข้อมูลการผลิตไฟฟ้าโซลาร์ในช่วงที่เลือก จึงยังคำนวณค่าการลดการปล่อยคาร์บอนไม่ได้":"";
+    $("carbon-method").textContent=carbonTotal===null?"เมื่อมีข้อมูลการผลิตโซลาร์ ระบบจะคำนวณให้อัตโนมัติ":`วิธีคำนวณ: ${fmt(solarForCarbon)} kWh × 0.4999 kgCO₂e/kWh = ${fmt(carbonTotal)} kgCO₂e รวม ${solarMonths.length} เดือนที่มีข้อมูล; เฉลี่ย ${fmt(carbonMonthly)} kgCO₂e/month`;
     const fault=$("fault-content");fault.replaceChildren();
     if(!inspections.length)fault.appendChild(make("p","ยังไม่มีผลตรวจ PM ตามตัวกรอง","empty"));
     else{
